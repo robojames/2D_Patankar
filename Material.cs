@@ -13,18 +13,33 @@ namespace _2D_Patankar_Model
 {
     class Material
     {
+        // Need to implement Material Properties as F(T) as well
+        
+        // Declare ErrorHandler object to display errors to the user
         ErrorHandler Material_Errors;
 
-        private string Mat_Name;
+        // String to cover the name of the material
+        public string Mat_Name { get; private set; }
 
+        // Constructor, currently requires the passing of the local ErrorHandler (on the main form) and the Material Name
         public Material(ErrorHandler local_ErrorHandler, string Material_Name)
         {
             Material_Errors = local_ErrorHandler;
             Mat_Name = Material_Name;
         }
 
+        //
+        // Uppercase letters denote class-only functions.  Access is given to other members (lowercase) via the get and set accessors.
+        //
+
+        // Thermal Conductivity
         private float K;
+
+        // Seebeck Coefficient
         private float Alpha;
+
+        // Density
+        private float Density;
 
         //
         // Thermal Conductivity (W / m K)
@@ -62,7 +77,26 @@ namespace _2D_Patankar_Model
             }
         }
 
-
+        //
+        // Density (kg/m^3)
+        //
+        public float rho
+        {
+            get
+            {
+                return Density;
+            }
+            set
+            {
+                if (value >= 0)
+                    Density = value;
+                else
+                {
+                    Density = 0;
+                    Material_Errors.Post_Error("ERROR:  Density set to 0 for Material:  " + Mat_Name);
+                }
+            }
+        }
 
 
     }
