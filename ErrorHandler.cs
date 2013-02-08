@@ -24,5 +24,23 @@ namespace _2D_Patankar_Model
         {
             ErrorBox.Text += text + Environment.NewLine; 
         }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // ErrorHandler
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Name = "ErrorHandler";
+            this.Load += new System.EventHandler(this.ErrorHandler_Load);
+            this.ResumeLayout(false);
+
+        }
+
+        private void ErrorHandler_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

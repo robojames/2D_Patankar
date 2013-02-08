@@ -17,7 +17,7 @@ namespace _2D_Patankar_Model
         public Main()
         {
             InitializeComponent();
-            myError = new ErrorHandler(this);
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -27,8 +27,9 @@ namespace _2D_Patankar_Model
 
         private void Main_Load(object sender, EventArgs e)
         {
-            Material copper = new Material(myError, "Copper");
-            copper.k = -5;
+            myError = new ErrorHandler(this);
+            MaterialManager myManager = new MaterialManager(myError);
+
         }
 
        
