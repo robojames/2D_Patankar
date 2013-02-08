@@ -34,9 +34,10 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
+            this.button1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.button1.Location = new System.Drawing.Point(0, 0);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(289, 55);
+            this.button1.Size = new System.Drawing.Size(321, 55);
             this.button1.TabIndex = 0;
             this.button1.Text = "Start Analysis";
             this.button1.UseVisualStyleBackColor = true;
@@ -45,11 +46,12 @@
             // textBox1
             // 
             this.textBox1.AcceptsReturn = true;
-            this.textBox1.Location = new System.Drawing.Point(12, 73);
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.textBox1.Location = new System.Drawing.Point(0, 61);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(297, 117);
+            this.textBox1.Size = new System.Drawing.Size(321, 141);
             this.textBox1.TabIndex = 1;
             // 
             // Main
