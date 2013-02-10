@@ -14,10 +14,23 @@ namespace _2D_Patankar_Model
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
         ErrorHandler NodeErrors;
 
-        // Default constructor of Node object - requires passing in of the local error handler so messages can be passed into the main UI
-        public Node(ErrorHandler local_ErrorHandler)
+        // Default constructor of Node object 
+        // 
+        // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
+        // to the specification of CV width in both X and Y directions, as well as the physical position on both
+        // the x and y axis.  The node indices (i,j) are also specified.
+        public Node(ErrorHandler local_ErrorHandler, int _i, int _j, float dX, float dY, float x_POS, float y_POS)
         {
             NodeErrors = local_ErrorHandler;
+            
+            i = _i;
+            j = _j;
+
+            delta_X = dX;
+            delta_Y = dY;
+
+            x_pos = x_POS;
+            y_pos = y_POS;
         }
 
         // Node index
@@ -40,7 +53,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     I = 0;
-                    NodeErrors.Post_Error("NODE INDEX ERROR:  Attempt to set node index i to less than 0");
+                    NodeErrors.Post_Error("NODE ERROR:  Attempt to set node index i to less than 0");
                 }
 
             }
@@ -60,7 +73,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     J = 0;
-                    NodeErrors.Post_Error("NODE INDEX ERROR:  Attempt to set node index j to less than 0");
+                    NodeErrors.Post_Error("NODE ERROR:  Attempt to set node index j to less than 0");
                 }
 
             }
@@ -86,7 +99,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     XPOS = 0;
-                    NodeErrors.Post_Error("NODE PHYSICAL INDEX ERROR:  Physical x location attempted set to negative value");
+                    NodeErrors.Post_Error("NODE ERROR:  Physical x location attempted set to negative value");
                 }
             }
         }
@@ -105,7 +118,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     YPOS = 0;
-                    NodeErrors.Post_Error("NODE PHYSICAL INDEX ERROR:  Physical y location attempted set to negative value");
+                    NodeErrors.Post_Error("NODE ERROR:  Physical y location attempted set to negative value");
                 }
             }
         }
@@ -130,7 +143,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     DX = 0;
-                    NodeErrors.Post_Error("NODE CV VOLUME ERROR:  DX attempted to set to 0 or less");
+                    NodeErrors.Post_Error("NODE ERROR:  DX attempted to set to 0 or less");
                 }
             }
         }
@@ -149,7 +162,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     DY = 0;
-                    NodeErrors.Post_Error("NODE CV VOLUME ERROR:  DY attempted to set to 0 or less");
+                    NodeErrors.Post_Error("NODE ERROR:  DY attempted to set to 0 or less");
                 }
             }
         }
@@ -171,13 +184,34 @@ namespace _2D_Patankar_Model
                 else
                 {
                     TEMP = 0;
-                    NodeErrors.Post_Error("Solution Error:  Phi (T) < or equal to zero at Node (" + I.ToString() + ", " + J.ToString() + ")");
+                    NodeErrors.Post_Error("NODE ERROR:  Phi (T) < or equal to zero at Node (" + I.ToString() + ", " + J.ToString() + ")");
                 }
             }
         }
 
+        // Gamma (Diffusion) Coefficient at this node [unsure]
+        private float GAMMA;
+        public float gamma
+        {
+            get
+            {
+                return GAMMA;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    GAMMA = value;
+                }
+                else
+                {
+                    GAMMA = 0;
+                    NodeErrors.Post_Error("NODE ERROR:  Gamma at Node (" + I.ToString() + ", " + J.ToString() + ") attempted to be set to < 0.");
+                }
+            }
+        }
 
-        public float gamma { get; set; }
+        
         public float P { get; set; }
         public float Q { get; set; }
         public float sc { get; set; }

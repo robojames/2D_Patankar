@@ -38,8 +38,34 @@ namespace _2D_Patankar_Model
         // Seebeck Coefficient
         private float Alpha;
 
+        // Specific Heat (Constant Pressure)
+        private float CP;
+
         // Density
         private float Density;
+
+
+        //
+        // Specific Heat Capacity (Constant Pressure) [J / kg K]
+        //
+        public float cp
+        {
+            get
+            {
+                return CP;
+            }
+            set
+            {
+
+                if (value >= 0)
+                    CP = value;
+                else
+                {
+                    CP = 0.0f;
+                    Material_Errors.Post_Error("MATERIAL ERROR:  Specific Heat set to 0 for Material:  " + Mat_Name);
+                }
+            }
+        }
 
         //
         // Thermal Conductivity (W / m K)
@@ -56,7 +82,7 @@ namespace _2D_Patankar_Model
                     K = value;
                 else
                 {
-                    Material_Errors.Post_Error("ERROR:  Thermal Conductivity Set to 0 for Material:  " + Mat_Name);
+                    Material_Errors.Post_Error("MATERIAL ERROR:  Thermal Conductivity Set to 0 for Material:  " + Mat_Name);
                     K = 0;
                 }
             }
@@ -73,7 +99,13 @@ namespace _2D_Patankar_Model
             }
             set
             {
-                Alpha = value;
+                if (value >= 0)
+                    Alpha = value;
+                else
+                {
+                    Alpha = 0.0f;
+                    Material_Errors.Post_Error("MATERIAL ERROR:  Seebeck Coefficient set to 0 for Material:  " + Mat_Name);
+                }
             }
         }
 
@@ -93,7 +125,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     Density = 0;
-                    Material_Errors.Post_Error("ERROR:  Density set to 0 for Material:  " + Mat_Name);
+                    Material_Errors.Post_Error("MATERIAL ERROR:  Density set to 0 for Material:  " + Mat_Name);
                 }
             }
         }
