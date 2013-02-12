@@ -70,6 +70,12 @@ namespace _2D_Patankar_Model
         {
             // Calls UpdateProgress() on Main.cs
             MainUIReference.UpdateProgress(percent_Complete);
+
+            if (percent_Complete == 100)
+            {
+                MainUIReference.UpdateProgress(0);
+                UpdateProgress_Text("");
+            }
         }
 
         // UpdateProgress_Text

@@ -47,6 +47,8 @@
     <Compile Include="ErrorHandler.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="TEMGeometry.cs" />
+    <Compile Include="Layer.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

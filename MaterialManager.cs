@@ -41,7 +41,7 @@ namespace _2D_Patankar_Model
 
         ErrorHandler MaterialManager_Errors;
 
-        List<Material> Material_List;
+        public List<Material> Material_List;
 
         // Default constructor for the MaterialManager class.  Error handler is passed in to allow for reporting of errors
         // through the base class, Material.

@@ -25,6 +25,8 @@ namespace _2D_Patankar_Model
 
             Mesh myMesh = new Mesh(myError, 50, 50);
 
+            TEMGeometry myGeometry = new TEMGeometry(myError);
+
         }
 
         private void Main_Load(object sender, EventArgs e)

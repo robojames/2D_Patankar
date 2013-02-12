@@ -211,7 +211,13 @@ namespace _2D_Patankar_Model
             }
         }
 
-        
+        public float AE { get; set; }
+        public float AP { get; set; }
+        public float AN { get; set; }
+        public float AS { get; set; }
+        public float AW { get; set; }
+
+        public float phi { get; set; }
         public float P { get; set; }
         public float Q { get; set; }
         public float sc { get; set; }
