@@ -51,6 +51,8 @@ namespace _2D_Patankar_Model
         // system.
         public Node[, ,] Nodes;
 
+        public List<Node> NodeList;
+
         // Errorhandler class to handle errors with mesh calculations
         ErrorHandler Mesh_Errors;
 
@@ -69,6 +71,8 @@ namespace _2D_Patankar_Model
             Assign_NodeCounts(LayerList);
 
             Nodes = new Node[20,20,48];
+
+            NodeList = new List<Node>();
 
             Generate_Mesh_ByLayer(LayerList);
         }
@@ -164,6 +168,8 @@ namespace _2D_Patankar_Model
 
                         Nodes[i, j, k] = new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS);
 
+                        NodeList.Add(new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS));
+
                         Check_Node(Nodes[i, j, k], Layers);
 
                         t_Nodes++;
@@ -180,54 +186,41 @@ namespace _2D_Patankar_Model
 
             Mesh_Errors.Post_Error("NOTE:  Total Nodes:  " + t_Nodes.ToString() + " = XNODES (" + x_Nodes.ToString() + ") + YNODES (" + y_Nodes.ToString() + ")");
 
-            Sort_Nodes(Nodes);
+            Sort_Nodes(NodeList);
         }
 
         private void Sort_Nodes(Node[,,] NodeList)
         {
-            Node[,] Sorted_Nodes = new Node[140,140];
-            int ii = 0;
-            int jj = 0;
+            int XMAX = NodeList.GetLength(0);
+            int YMAX = NodeList.GetLength(1);
+            int ZMAX = NodeList.GetLength(2);
 
-            for (int x = 0; x < 5000; x++)
+            Node[] Flattened_NodeArray = new Node[(XMAX * YMAX * ZMAX) + 1];
+
+            // First flatten array to 1D
+            for (int i = 0; i < XMAX; i++)
             {
-                float currX = 0.00f;
-                float currY = 0.00f;
-                foreach (Node node in NodeList)
+                for (int j = 0; j < YMAX; j++)
                 {
-                    if (node != null)
+                    for (int k = 0; k < ZMAX; k++)
                     {
-                        for (int i = 0; i < 5000; i++)
-                        {
-                            if (node.x_pos <= (float)i * min_DX && node.y_pos <= currY && node.is_Sorted == false)
-                            {
-                                Sorted_Nodes[ii, jj] = node;
-                                node.is_Sorted = true;
-                                ii++;
-                            }
+                        Flattened_NodeArray[i + XMAX * j + k * XMAX * ZMAX] = NodeList[i, j, k];
 
-                            if (node.x_pos <= currX && node.y_pos <= (float)i * min_DY && node.is_Sorted == false)
-                            {
-                                Sorted_Nodes[ii, jj] = node;
-                                node.is_Sorted = true;
-                                jj++;
-                            }
-
-                        }
-
+                        
                     }
                 }
+            }
 
-                currX += min_DX;
-                currY += min_DY;
-            }
-            for (int i = 0; i < 140; i++)
-            {
-                for (int j = 0; j < 140; j++)
-                {
-                    Mesh_Errors.Post_Error("Node (" + i.ToString() + "," + j.ToString() + ") = (" + Sorted_Nodes[i, j].x_pos.ToString() + "," + Sorted_Nodes[i, j].y_pos.ToString() + ")");
-                }
-            }
+            // This doesn't work...
+            //var sortedandGrouped = Flattened_NodeArray.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
+        }
+
+        private void Sort_Nodes(List<Node> NodeList)
+        {
+            var Sorted_NodeList = NodeList.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
+
+            Nodes[50000, 50000, 5000].phi = 0.0f;
+
 
         }
 
