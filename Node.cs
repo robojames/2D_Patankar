@@ -31,6 +31,8 @@ namespace _2D_Patankar_Model
 
             x_pos = x_POS;
             y_pos = y_POS;
+
+            is_Sorted = false;
         }
 
         // Node index
@@ -38,6 +40,8 @@ namespace _2D_Patankar_Model
         // j - index in the y-direction
         private int I;
         private int J;
+
+        public bool is_Sorted;
 
         // Accessor function for the x-direction
         public int i

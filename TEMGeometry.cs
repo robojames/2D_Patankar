@@ -66,14 +66,14 @@ namespace _2D_Patankar_Model
             // may be eventually removed as the code matures
             foreach (Layer layer in Layer_List)
             {
-                Geometry_Errors.Post_Error("Layer ID:  " + layer.getID().ToString() + ": " + layer.Layer_Area.ToString());
+                //Geometry_Errors.Post_Error("Layer ID:  " + layer.getID().ToString() + ": " + layer.Layer_Area.ToString());
             }
         }
 
         // GenerateGeometry
         //
         // Main function which generates the geometry of the TEM, and organizes it into a list of layers
-        public void GenerateGeometry()
+        public List<Layer> GenerateGeometry()
         {
             // Update MainUI (ie, the user) with the progress of the geometry generation
             Geometry_Errors.UpdateProgress(0);
@@ -159,6 +159,8 @@ namespace _2D_Patankar_Model
             Geometry_Errors.UpdateProgress(100);
 
             Geometry_Errors.Post_Error("NOTE:  Geometry for the TEM has been generated succesfully");
+
+            return Layer_List;
         }
 
 
@@ -176,7 +178,7 @@ namespace _2D_Patankar_Model
                 }
                 else
                 {
-                    Geometry_Errors.Post_Error("Note:  Area for Layer " + Mesh_Layer.getID().ToString() + " generated successfully");
+                    //Geometry_Errors.Post_Error("Note:  Area for Layer " + Mesh_Layer.getID().ToString() + " generated successfully");
                 }
             }
         }

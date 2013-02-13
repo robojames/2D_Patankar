@@ -18,12 +18,17 @@ namespace _2D_Patankar_Model
         // Holds value of Layer Area
         public float Layer_Area;
 
+        public float Layer_x0;
+        public float Layer_xf;
+        public float Layer_y0;
+        public float Layer_yf;
+
         // Rectangle
         //
         // Struct which holds two coordinate pairs representing the upper right corner (x0,y0)
         // and the lower right corner (xf,yf) which represents a rectangle.  This rectangle
         // encloses a certain part of the computational domain.
-        struct Rectangle
+        public struct Rectangle
         {
             public float x_0, y_0, x_f, y_f;
 
@@ -68,7 +73,7 @@ namespace _2D_Patankar_Model
         ErrorHandler Layer_Errors;
 
         // Rectangle for this layer.  
-        Rectangle Layer_Rectangle;
+        public Rectangle Layer_Rectangle;
 
         // Holds the string value of the material that is used on this layer.  This will
         // eventually be used in nodal assignment to match layer materials to their respective
@@ -86,6 +91,11 @@ namespace _2D_Patankar_Model
             Check_Positioning(x_0, y_0, x_f, y_f);
             
             Layer_Rectangle = new Rectangle(x_0, y_0, x_f, y_f);
+
+            Layer_x0 = x_0;
+            Layer_xf = x_f;
+            Layer_y0 = y_0;
+            Layer_yf = y_f;
 
             Layer_Material = Mat_Name;
 
@@ -140,6 +150,46 @@ namespace _2D_Patankar_Model
                     Layer_Errors.Post_Error("LAYER ERROR:  Node count for Layer:  " + getID().ToString() + " attempted to be set less than or equal to 0.");
                 }
             }
+        }
+
+        public float dX(float i)
+        {
+            float X0 = this.Layer_Rectangle.x_0;
+            float XF = this.Layer_Rectangle.x_f;
+
+            float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f)) * i;
+
+            return dx;
+        }
+
+        public float dX()
+        {
+            float X0 = this.Layer_Rectangle.x_0;
+            float XF = this.Layer_Rectangle.x_f;
+
+            float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f));
+
+            return dx;
+        }
+
+        public float dY(float i)
+        {
+            float Y0 = this.Layer_Rectangle.y_0;
+            float YF = this.Layer_Rectangle.y_f;
+
+            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
+
+            return dy;
+        }
+
+        public float dY()
+        {
+            float Y0 = this.Layer_Rectangle.y_0;
+            float YF = this.Layer_Rectangle.y_f;
+
+            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f));
+
+            return dy;
         }
 
 

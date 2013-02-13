@@ -23,9 +23,11 @@ namespace _2D_Patankar_Model
         {
             MaterialManager myManager = new MaterialManager(myError);
 
-            Mesh myMesh = new Mesh(myError, 50, 50);
-
             TEMGeometry myGeometry = new TEMGeometry(myError);
+
+
+            Mesh myMesh = new Mesh(myError, myGeometry.Layer_List);
+
 
         }
 
