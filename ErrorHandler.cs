@@ -76,6 +76,8 @@ namespace _2D_Patankar_Model
                 MainUIReference.UpdateProgress(0);
                 UpdateProgress_Text("");
             }
+
+            Application.DoEvents();
         }
 
         // UpdateProgress_Text

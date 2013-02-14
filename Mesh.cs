@@ -43,14 +43,6 @@ namespace _2D_Patankar_Model
         // Total number of nodes in physical system
         private int t_Nodes;
 
-        // Minimal incremental dx and dy changes
-        private float min_DX;
-        private float min_DY;
-
-        // Node[,] is a 2D array of Node objects, which constitute the mesh of the given
-        // system.
-        public Node[, ,] Nodes;
-
         public List<Node> NodeList;
 
         // Errorhandler class to handle errors with mesh calculations
@@ -65,12 +57,7 @@ namespace _2D_Patankar_Model
             x_Nodes = 0;
             y_Nodes = 0;
 
-            min_DX = 5;
-            min_DY = 5;
-
             Assign_NodeCounts(LayerList);
-
-            Nodes = new Node[20,20,48];
 
             NodeList = new List<Node>();
 
@@ -81,7 +68,7 @@ namespace _2D_Patankar_Model
         {
             foreach (Layer c_Layer in LayerList)
             {
-                c_Layer.Nodes = 20;
+                c_Layer.Nodes = 150;
             }
         }
 
@@ -144,33 +131,14 @@ namespace _2D_Patankar_Model
 
                 for (int i = 0; i < Layers.Nodes; i++)
                 {
-                    x_Nodes++;
-
                     for (int j = 0; j < Layers.Nodes; j++)
                     {
-                        if (j==0)
-                            y_Nodes++;
-
                         float X_POS = Layers.dX((float)i);
                         float Y_POS = Layers.dY((float)i);
 
-                        if (Layers.dX() < min_DX)
-                        {
-                            min_DX = Layers.dX();
-                            Mesh_Errors.Post_Error("NOTE:  New min_DX set:  " + min_DX.ToString());
-                        }
+                        NodeList.Add(new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS, t_Nodes));
 
-                        if (Layers.dY() < min_DY)
-                        {
-                            min_DY = Layers.dY();
-                            Mesh_Errors.Post_Error("NOTE:  New min_DY set:  " + min_DY.ToString());
-                        }
-
-                        Nodes[i, j, k] = new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS);
-
-                        NodeList.Add(new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS));
-
-                        Check_Node(Nodes[i, j, k], Layers);
+                        Check_Node(NodeList.Last(), Layers);
 
                         t_Nodes++;
                     }
@@ -181,46 +149,68 @@ namespace _2D_Patankar_Model
  
             }
 
-
             Mesh_Errors.UpdateProgress_Text("");
-
-            Mesh_Errors.Post_Error("NOTE:  Total Nodes:  " + t_Nodes.ToString() + " = XNODES (" + x_Nodes.ToString() + ") + YNODES (" + y_Nodes.ToString() + ")");
 
             Sort_Nodes(NodeList);
         }
 
-        private void Sort_Nodes(Node[,,] NodeList)
+   
+        private void Sort_Nodes(List<Node> NodeList)
         {
-            int XMAX = NodeList.GetLength(0);
-            int YMAX = NodeList.GetLength(1);
-            int ZMAX = NodeList.GetLength(2);
+            int initial_NodeCount = NodeList.Count;
 
-            Node[] Flattened_NodeArray = new Node[(XMAX * YMAX * ZMAX) + 1];
+            Mesh_Errors.UpdateProgress_Text("Sorting...");
 
-            // First flatten array to 1D
-            for (int i = 0; i < XMAX; i++)
+            for (int i = 0; i < NodeList.Count; i++)
             {
-                for (int j = 0; j < YMAX; j++)
-                {
-                    for (int k = 0; k < ZMAX; k++)
-                    {
-                        Flattened_NodeArray[i + XMAX * j + k * XMAX * ZMAX] = NodeList[i, j, k];
+                float x_int = NodeList[i].x_pos;
+                float y_int = NodeList[i].y_pos;
 
-                        
+                float percent_complete = ((float)i / (float)NodeList.Count) * 100;
+
+                Mesh_Errors.UpdateProgress((int)Math.Ceiling(percent_complete));
+
+                for (int ii = 0; ii < NodeList.Count; ii++)
+                {
+
+                    if (NodeList[ii].x_pos == x_int && NodeList[ii].y_pos == y_int)
+                    {
+                        NodeList.Remove(NodeList[ii]);
                     }
+                    
+                    
+                }
+
+            }
+
+            Mesh_Errors.Post_Error("NOTE:  Initial node count:  " + initial_NodeCount.ToString() + ", Final node count:  " + NodeList.Count.ToString());
+            Mesh_Errors.Post_Error("NOTE:  Finished sorting");
+
+            var Sorted_NodeList = NodeList.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
+
+            ListtoJaggedArray(Sorted_NodeList);
+        }
+
+        private Node[][] ListtoJaggedArray(IList<IGrouping<float, Node>> p_NodeList)
+        {
+            var result = new Node[p_NodeList.Count][];
+
+            int n_Nodes_Total = 0;
+
+            for (var i = 0; i < p_NodeList.Count; i++)
+            {
+                result[i] = p_NodeList[i].ToArray();
+            }
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                for (int j = 0; j < result[i].Length; j++)
+                {
+                    n_Nodes_Total++;
                 }
             }
 
-            // This doesn't work...
-            //var sortedandGrouped = Flattened_NodeArray.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
-        }
-
-        private void Sort_Nodes(List<Node> NodeList)
-        {
-            var Sorted_NodeList = NodeList.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
-
-            Nodes[50000, 50000, 5000].phi = 0.0f;
-
+            return result;
 
         }
 

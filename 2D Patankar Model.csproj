@@ -47,6 +47,7 @@
     <Compile Include="ErrorHandler.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="NodeComparer.cs" />
     <Compile Include="Solver.cs" />
     <Compile Include="TEMGeometry.cs" />
     <Compile Include="Layer.cs" />

@@ -14,12 +14,14 @@ namespace _2D_Patankar_Model
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
         ErrorHandler NodeErrors;
 
+        public int Node_ID;
+
         // Default constructor of Node object 
         // 
         // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
         // to the specification of CV width in both X and Y directions, as well as the physical position on both
         // the x and y axis.  The node indices (i,j) are also specified.
-        public Node(ErrorHandler local_ErrorHandler, int _i, int _j, float dX, float dY, float x_POS, float y_POS)
+        public Node(ErrorHandler local_ErrorHandler, int _i, int _j, float dX, float dY, float x_POS, float y_POS, int ID)
         {
             NodeErrors = local_ErrorHandler;
             
@@ -31,6 +33,8 @@ namespace _2D_Patankar_Model
 
             x_pos = x_POS;
             y_pos = y_POS;
+
+            Node_ID = ID;
 
             is_Sorted = false;
         }
