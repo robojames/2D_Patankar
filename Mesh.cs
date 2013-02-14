@@ -185,6 +185,11 @@ namespace _2D_Patankar_Model
 
             Mesh_Errors.Post_Error("NOTE:  Finished arranging node list into jagged array");
 
+            // Display Jagged Array to User
+            for (var i = 0; i < result[i].Count(); i++)
+            {
+                Mesh_Errors.Post_Error("NOTE:  Final Array is Node[" + result.Count().ToString() + ", " + result[i].Count().ToString() + "]");
+            }
             // Returns Node[][] to user
             return result;
 

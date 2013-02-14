@@ -15,6 +15,11 @@ namespace _2D_Patankar_Model
         private const float x_max = 0.0401828f;
         private const float y_max = 0.004864f;
 
+        // Holds the value of the dx and dy seperation for the internal rectangle that is used to position the nodes on
+        // to allow room for the c.v. boundary to the material boundaries
+        private float layer_dx;
+        private float layer_dy;
+
         // Holds value of Layer Area
         public float Layer_Area;
 
