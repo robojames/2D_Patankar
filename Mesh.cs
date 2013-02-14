@@ -54,66 +54,9 @@ namespace _2D_Patankar_Model
 
             t_Nodes = 0;
 
-            x_Nodes = 0;
-            y_Nodes = 0;
-
-            Assign_NodeCounts(LayerList);
-
             NodeList = new List<Node>();
 
             Generate_Mesh_ByLayer(LayerList);
-        }
-
-        public void Assign_NodeCounts(List<Layer> LayerList)
-        {
-            foreach (Layer c_Layer in LayerList)
-            {
-                c_Layer.Nodes = 150;
-            }
-        }
-
-        // XNODES - Number of nodes in the x direction
-        // YNODES - Number of nodes in the y direction
-        private int XNODES;
-        private int YNODES;
-
-
-        // Accessor function for XNODES
-        public int x_Nodes
-        {
-            get
-            {
-                return XNODES;
-            }
-            set
-            {
-                if (value >= 0)
-                    XNODES = value;
-                else
-                {
-                    XNODES = 0;
-                    Mesh_Errors.Post_Error("MESH ERROR:  Assignment of XNODES less than 0.");
-                }
-            }
-        }
-
-        // Accessor function for YNODES
-        public int y_Nodes
-        {
-            get
-            {
-                return YNODES;
-            }
-            set
-            {
-                if (value >= 0)
-                    YNODES = value;
-                else
-                {
-                    YNODES = 0;
-                    Mesh_Errors.Post_Error("MESH ERROR:  Assignment of YNODES less than 0.");
-                }
-            }
         }
 
         // Main subroutine which generates the mesh, given XNODES and YNODES
@@ -121,95 +64,128 @@ namespace _2D_Patankar_Model
         {
             Mesh_Errors.UpdateProgress_Text("Meshing...");
 
+            // Iterates over each Layer in the included geometry files (Currently just TEMGeometry.cs)
             foreach (Layer Layers in LayerList)
             {
+                // Obtains current Layer ID
                 int k = Layers.getID();
 
+                // Calculates current progress to display on the Main UI
                 int progress = (k) / LayerList.Count;
 
+                // Passes calculated progress to the ErrorHandler which feeds in the data to the main UI
                 Mesh_Errors.UpdateProgress(progress);
 
+                // Main double-for loop which iterates twice over Layers.Nodes (this assumes that each
+                // direction (x & y) has the same number of nodes, so that the total nodes for each layer
+                // is Layers.Nodes^2
                 for (int i = 0; i < Layers.Nodes; i++)
                 {
                     for (int j = 0; j < Layers.Nodes; j++)
                     {
-                        float X_POS = Layers.dX((float)i);
-                        float Y_POS = Layers.dY((float)i);
+                        // Calculates the dX and dY values (can be changed depending on layer)
+                        // but currently uses a step offset for the cv width with an otherwise
+                        // uniform distribution
+                        float X_POS = Layers.dX((float)i, Layers.Nodes);
+                        float Y_POS = Layers.dY((float)j, Layers.Nodes);
 
-                        NodeList.Add(new Node(Mesh_Errors, i, j, 0.01f, 0.01f, X_POS, Y_POS, t_Nodes));
+                        // Adds Node to NodeList
+                        NodeList.Add(new Node(Mesh_Errors, 0.01f, 0.01f, X_POS, Y_POS, t_Nodes));
 
+                        // Feeds in the just-added node and checks it against the layer geometry to ensure proper positioning
                         Check_Node(NodeList.Last(), Layers);
 
+                        // Increments the total number of perceived nodes--this value is used to report the number of nodes 
+                        // generated for debugging purposes.
                         t_Nodes++;
                     }
+
                 }
 
+                // Reports that the current layer has been succesfully been meshed
                 Mesh_Errors.Post_Error("Note:  Layer " + Layers.getID() + " meshed succesfully.");
-
- 
             }
 
+            // Clears Status text on the MainUI
             Mesh_Errors.UpdateProgress_Text("");
 
+            // Calls the Sort_Nodes function which arranges the nodes into a jagged array Nodes[][]
+            // and organizes them with respect to their physical distance from origin.
             Sort_Nodes(NodeList);
         }
 
-   
+        // Sort_Nodes
+        //
+        // Sorts nodes by first eliminating duplicate nodes (typically around half), as well as
+        // arranges them into a jagged array Node[][] which is arranged with respect to the physical distance
+        // in [m] from the origin
         private void Sort_Nodes(List<Node> NodeList)
         {
+            // Grabs the initial number of nodes passed in via the NodeList
             int initial_NodeCount = NodeList.Count;
 
+            // Updates the MainUI status Text
             Mesh_Errors.UpdateProgress_Text("Sorting...");
 
+            // Main for loop which iterates over the entire node list
             for (int i = 0; i < NodeList.Count; i++)
             {
+                // Each node in the node list has an x and y position which is 
+                // checked against the entire node array
                 float x_int = NodeList[i].x_pos;
                 float y_int = NodeList[i].y_pos;
 
+                // Calculates the percentage complete based on the current node
+                // count (which is reduced each time a removal is performed)
                 float percent_complete = ((float)i / (float)NodeList.Count) * 100;
 
+                // Updates MainUI with progress
                 Mesh_Errors.UpdateProgress((int)Math.Ceiling(percent_complete));
 
+                // Secondary for loop which compares the indicated value of x_int and y_int
+                // with all other nodes in the nodelist.
                 for (int ii = 0; ii < NodeList.Count; ii++)
                 {
-
-                    if (NodeList[ii].x_pos == x_int && NodeList[ii].y_pos == y_int)
+                    // Checks to see if the node position of interest (xint,yint) is equivalent
+                    // to the currently observed node
+                    if (NodeList[ii].x_pos == x_int && NodeList[ii].y_pos == y_int && i != ii)
                     {
+                        // Removes currently observed node from node list
                         NodeList.Remove(NodeList[ii]);
-                    }
-                    
-                    
+                    }   
                 }
 
             }
 
+            // Reports to user both the eliminated number of notes, and that the operation is finished
             Mesh_Errors.Post_Error("NOTE:  Initial node count:  " + initial_NodeCount.ToString() + ", Final node count:  " + NodeList.Count.ToString());
-            Mesh_Errors.Post_Error("NOTE:  Finished sorting");
+            Mesh_Errors.Post_Error("NOTE:  Finished sorting and removing duplicates");
 
+            // The NodeList is then sorted first by the x position, and then by the yposition (and then grouped via x position 'keys' before
+            // being passed into the ListtoJaggedArray() function.
             var Sorted_NodeList = NodeList.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
 
             ListtoJaggedArray(Sorted_NodeList);
         }
 
+        // ListToJaggedArray
+        //
+        // When passed in a sorted NodeList, ListToJaggedArray arranges the nodes into a 2D jagged array 
+        // of Node[][].  This ensures that Node[0][0] is the least node in the (x,y) and Node[0][1] is just
+        // to the right of it, etc.
         private Node[][] ListtoJaggedArray(IList<IGrouping<float, Node>> p_NodeList)
         {
+            // Creates new jagged array to hold NodeList data
             var result = new Node[p_NodeList.Count][];
-
-            int n_Nodes_Total = 0;
 
             for (var i = 0; i < p_NodeList.Count; i++)
             {
                 result[i] = p_NodeList[i].ToArray();
             }
 
-            for (int i = 0; i < result.Length; i++)
-            {
-                for (int j = 0; j < result[i].Length; j++)
-                {
-                    n_Nodes_Total++;
-                }
-            }
+            Mesh_Errors.Post_Error("NOTE:  Finished arranging node list into jagged array");
 
+            // Returns Node[][] to user
             return result;
 
         }

@@ -84,7 +84,7 @@ namespace _2D_Patankar_Model
         //
         // Layer constructor which requires the initialization of both coordinate pairs, material name
         // and the ErrorHandler function to be passed in.
-        public Layer(ErrorHandler local_ErrorHandler, float x_0, float y_0, float x_f, float y_f, string Mat_Name)
+        public Layer(ErrorHandler local_ErrorHandler, float x_0, float y_0, float x_f, float y_f, string Mat_Name, int n_Nodes)
         {
             Layer_Errors = local_ErrorHandler;
 
@@ -100,6 +100,8 @@ namespace _2D_Patankar_Model
             Layer_Material = Mat_Name;
 
             Layer_Area = Layer_Rectangle.Area();
+
+            Nodes = n_Nodes;
 
             Layer_ID = LayerID++;
         }
@@ -152,7 +154,7 @@ namespace _2D_Patankar_Model
             }
         }
 
-        public float dX(float i)
+        public float dX(float i, int max)
         {
             float X0 = this.Layer_Rectangle.x_0;
             float XF = this.Layer_Rectangle.x_f;
@@ -160,6 +162,16 @@ namespace _2D_Patankar_Model
             float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f)) * i;
 
             return dx;
+        }
+
+        public float dY(float i, int max)
+        {
+            float Y0 = this.Layer_Rectangle.y_0;
+            float YF = this.Layer_Rectangle.y_f;
+
+            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
+
+            return dy;
         }
 
         public float dX()
@@ -172,15 +184,7 @@ namespace _2D_Patankar_Model
             return dx;
         }
 
-        public float dY(float i)
-        {
-            float Y0 = this.Layer_Rectangle.y_0;
-            float YF = this.Layer_Rectangle.y_f;
-
-            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
-
-            return dy;
-        }
+        
 
         public float dY()
         {

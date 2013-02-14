@@ -21,13 +21,10 @@ namespace _2D_Patankar_Model
         // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
         // to the specification of CV width in both X and Y directions, as well as the physical position on both
         // the x and y axis.  The node indices (i,j) are also specified.
-        public Node(ErrorHandler local_ErrorHandler, int _i, int _j, float dX, float dY, float x_POS, float y_POS, int ID)
+        public Node(ErrorHandler local_ErrorHandler, float dX, float dY, float x_POS, float y_POS, int ID)
         {
             NodeErrors = local_ErrorHandler;
-            
-            i = _i;
-            j = _j;
-
+           
             delta_X = dX;
             delta_Y = dY;
 

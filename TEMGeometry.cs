@@ -30,6 +30,11 @@ namespace _2D_Patankar_Model
         private const float CE_Thickness = 0.00041910f;
         private const float AIR_Height = 0.00172589f;
 
+        private const int n_Nodes_BiTe = 50;
+        private const int n_Nodes_Air = 20;
+        private const int n_Nodes_CE = 50;
+        private const int n_Nodes_Ceramic = 50;
+
         // Series of x0, y0, xf, and yf values (see Rectangle in Layer.cs) provided for
         // reference, and in case the geometry changes slightly
         private float[] x_0 = new float[4] { 0, 0.001016f, 0.001016f, 0.001016f};
@@ -80,14 +85,14 @@ namespace _2D_Patankar_Model
             Geometry_Errors.UpdateProgress_Text("Generating Geometry and Material Layers");
 
             // Create base ceramic layer
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[0], x_f[0], y_f[0], "Ceramic"));
+            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[0], x_f[0], y_f[0], "Ceramic", n_Nodes_Ceramic));
 
             // Create thin copper connector (bottom, first and last)
             //
             // First
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[1], y_0[1], x_f[1], y_f[1], "Copper"));
+            Layer_List.Add(new Layer(Geometry_Errors, x_0[1], y_0[1], x_f[1], y_f[1], "Copper", n_Nodes_CE));
             // Last
-            Layer_List.Add(new Layer(Geometry_Errors, (x_0[1] + ((n_elements - 1) * (BiTE_AirGap + BiTE_Thickness))), y_0[1], 0.0389636f, y_0[1] - CE_Thickness, "Copper")); 
+            Layer_List.Add(new Layer(Geometry_Errors, (x_0[1] + ((n_elements - 1) * (BiTE_AirGap + BiTE_Thickness))), y_0[1], 0.0389636f, y_0[1] - CE_Thickness, "Copper", n_Nodes_CE)); 
 
             // Create all BiTE elements
             for (int k = 0; k < n_elements; k++)
@@ -97,7 +102,7 @@ namespace _2D_Patankar_Model
                 float x_f_BITE = x_0_BITE + BiTE_Thickness;
                 float y_f_BITE = y_0_BiTE - BiTE_Height;
 
-                Layer_List.Add(new Layer(Geometry_Errors, x_0_BITE, y_0_BiTE, x_f_BITE, y_f_BITE, "BiTe"));
+                Layer_List.Add(new Layer(Geometry_Errors, x_0_BITE, y_0_BiTE, x_f_BITE, y_f_BITE, "BiTe", n_Nodes_BiTe));
             }
 
             Geometry_Errors.UpdateProgress(20);
@@ -111,7 +116,7 @@ namespace _2D_Patankar_Model
                 float x_f_CE = x_0_CE + CE_Width;
                 float y_f_CE = y_0_CE - CE_Thickness;
 
-                Layer_List.Add(new Layer(Geometry_Errors, x_0_CE, y_0_CE, x_f_CE, y_f_CE, "Copper"));
+                Layer_List.Add(new Layer(Geometry_Errors, x_0_CE, y_0_CE, x_f_CE, y_f_CE, "Copper", n_Nodes_CE));
             }
 
             Geometry_Errors.UpdateProgress(40);
@@ -128,12 +133,12 @@ namespace _2D_Patankar_Model
             Geometry_Errors.UpdateProgress(60);
 
             // Create top Ceramic Plate
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], 0.00341499f, 0.0399796f, 0.00277999f, "Ceramic"));
+            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], 0.00341499f, 0.0399796f, 0.00277999f, "Ceramic", n_Nodes_Ceramic));
 
             // Create Air Boxes
             //
             // Area contained via left side by air
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[3], x_0[1], y_f[1], "Air"));
+            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[3], x_0[1], y_f[1], "Air", n_Nodes_Air));
 
             // Middle Boxes
             for (int j = 0; j < ((n_elements) - 1); j++)
@@ -153,7 +158,7 @@ namespace _2D_Patankar_Model
                 float Air_xf = Air_x0 + BiTE_AirGap;
                 float Air_yf = Air_y0 - AIR_Height;
 
-                Layer_List.Add(new Layer(Geometry_Errors, Air_x0, Air_y0, Air_xf, Air_yf, "Air"));
+                Layer_List.Add(new Layer(Geometry_Errors, Air_x0, Air_y0, Air_xf, Air_yf, "Air", n_Nodes_Air));
             }
 
             Geometry_Errors.UpdateProgress(100);

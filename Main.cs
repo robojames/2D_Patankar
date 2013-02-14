@@ -41,7 +41,7 @@ namespace _2D_Patankar_Model
             if (percent_Complete >= 0 && percent_Complete <= 100)
                 progressBar1.Value = percent_Complete;
 
-            if (percent_Complete < 100)
+            if (percent_Complete <= 100)
                 button1.Enabled = false;
             else
                 button1.Enabled = true;
@@ -51,6 +51,14 @@ namespace _2D_Patankar_Model
         {
             label1.Text = "Progress: " + status_Text;
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            textBox1.SelectionStart = textBox1.Text.Length;
+            textBox1.ScrollToCaret();
+        }
+
+       
        
     }
 }
