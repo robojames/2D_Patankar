@@ -159,48 +159,29 @@ namespace _2D_Patankar_Model
             }
         }
 
-        public float dX(float i, int max)
+        public float dX(float i)
         {
-            float X0 = this.Layer_Rectangle.x_0;
-            float XF = this.Layer_Rectangle.x_f;
+            this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (float)Nodes;
+
+            float X0 = this.Layer_Rectangle.x_0 + this.layer_dx;
+            float XF = this.Layer_Rectangle.x_f - this.layer_dx;
 
             float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f)) * i;
 
             return dx;
         }
 
-        public float dY(float i, int max)
+        public float dY(float i)
         {
-            float Y0 = this.Layer_Rectangle.y_0;
-            float YF = this.Layer_Rectangle.y_f;
+            this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (float)Nodes;
+
+            float Y0 = this.Layer_Rectangle.y_0 - this.layer_dy;
+            float YF = this.Layer_Rectangle.y_f + this.layer_dy;
 
             float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
 
             return dy;
         }
-
-        public float dX()
-        {
-            float X0 = this.Layer_Rectangle.x_0;
-            float XF = this.Layer_Rectangle.x_f;
-
-            float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f));
-
-            return dx;
-        }
-
-        
-
-        public float dY()
-        {
-            float Y0 = this.Layer_Rectangle.y_0;
-            float YF = this.Layer_Rectangle.y_f;
-
-            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f));
-
-            return dy;
-        }
-
-
+         
     }
 }

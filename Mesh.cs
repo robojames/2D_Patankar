@@ -43,7 +43,9 @@ namespace _2D_Patankar_Model
         // Total number of nodes in physical system
         private int t_Nodes;
 
-        public List<Node> NodeList;
+        private List<Node> NodeList;
+
+        public Node[][] NodeArray;
 
         // Errorhandler class to handle errors with mesh calculations
         ErrorHandler Mesh_Errors;
@@ -67,6 +69,8 @@ namespace _2D_Patankar_Model
             // Iterates over each Layer in the included geometry files (Currently just TEMGeometry.cs)
             foreach (Layer Layers in LayerList)
             {
+                int layer_Nodes = 0;
+
                 // Obtains current Layer ID
                 int k = Layers.getID();
 
@@ -83,14 +87,19 @@ namespace _2D_Patankar_Model
                 {
                     for (int j = 0; j < Layers.Nodes; j++)
                     {
+                        layer_Nodes++;
+
                         // Calculates the dX and dY values (can be changed depending on layer)
                         // but currently uses a step offset for the cv width with an otherwise
                         // uniform distribution
-                        float X_POS = Layers.dX((float)i, Layers.Nodes);
-                        float Y_POS = Layers.dY((float)j, Layers.Nodes);
+                        float X_POS = Layers.dX((float)i);
+                        float Y_POS = Layers.dY((float)j);
 
                         // Adds Node to NodeList
-                        NodeList.Add(new Node(Mesh_Errors, 0.01f, 0.01f, X_POS, Y_POS, t_Nodes));
+                        NodeList.Add(new Node(Mesh_Errors, X_POS, Y_POS, t_Nodes, k));
+
+                        // Assigns layer material to current node
+                        NodeList.Last().Material = Layers.Layer_Material;
 
                         // Feeds in the just-added node and checks it against the layer geometry to ensure proper positioning
                         Check_Node(NodeList.Last(), Layers);
@@ -103,7 +112,7 @@ namespace _2D_Patankar_Model
                 }
 
                 // Reports that the current layer has been succesfully been meshed
-                Mesh_Errors.Post_Error("Note:  Layer " + Layers.getID() + " meshed succesfully.");
+                Mesh_Errors.Post_Error("Note:  Layer " + Layers.getID() + " meshed succesfully:  Nodes:  " + layer_Nodes.ToString() + " / " + t_Nodes.ToString());
             }
 
             // Clears Status text on the MainUI
@@ -127,45 +136,13 @@ namespace _2D_Patankar_Model
             // Updates the MainUI status Text
             Mesh_Errors.UpdateProgress_Text("Sorting...");
 
-            // Main for loop which iterates over the entire node list
-            for (int i = 0; i < NodeList.Count; i++)
-            {
-                // Each node in the node list has an x and y position which is 
-                // checked against the entire node array
-                float x_int = NodeList[i].x_pos;
-                float y_int = NodeList[i].y_pos;
-
-                // Calculates the percentage complete based on the current node
-                // count (which is reduced each time a removal is performed)
-                float percent_complete = ((float)i / (float)NodeList.Count) * 100;
-
-                // Updates MainUI with progress
-                Mesh_Errors.UpdateProgress((int)Math.Ceiling(percent_complete));
-
-                // Secondary for loop which compares the indicated value of x_int and y_int
-                // with all other nodes in the nodelist.
-                for (int ii = 0; ii < NodeList.Count; ii++)
-                {
-                    // Checks to see if the node position of interest (xint,yint) is equivalent
-                    // to the currently observed node
-                    if (NodeList[ii].x_pos == x_int && NodeList[ii].y_pos == y_int && i != ii)
-                    {
-                        // Removes currently observed node from node list
-                        NodeList.Remove(NodeList[ii]);
-                    }   
-                }
-
-            }
-
-            // Reports to user both the eliminated number of notes, and that the operation is finished
-            Mesh_Errors.Post_Error("NOTE:  Initial node count:  " + initial_NodeCount.ToString() + ", Final node count:  " + NodeList.Count.ToString());
-            Mesh_Errors.Post_Error("NOTE:  Finished sorting and removing duplicates");
-
             // The NodeList is then sorted first by the x position, and then by the yposition (and then grouped via x position 'keys' before
             // being passed into the ListtoJaggedArray() function.
             var Sorted_NodeList = NodeList.OrderBy(node => node.x_pos).ThenBy(node => node.y_pos).GroupBy(pt => pt.x_pos).ToList();
 
-            ListtoJaggedArray(Sorted_NodeList);
+            Mesh_Errors.UpdateProgress(100);
+
+            NodeArray = ListtoJaggedArray(Sorted_NodeList);
         }
 
         // ListToJaggedArray
@@ -190,6 +167,7 @@ namespace _2D_Patankar_Model
             {
                 Mesh_Errors.Post_Error("NOTE:  Final Array is Node[" + result.Count().ToString() + ", " + result[i].Count().ToString() + "]");
             }
+
             // Returns Node[][] to user
             return result;
 

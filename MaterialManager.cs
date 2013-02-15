@@ -37,6 +37,11 @@ namespace _2D_Patankar_Model
         const float k_Glass = 14.0f;
         const float cp_Glass = 835.0f;
 
+        // FIX THESE VALUES HAHHHHHH
+        const float rho_Air = 0.0f;
+        const float k_Air = 0.0f;
+        const float cp_Air = 0.0f;
+
         const float alpha_BiTE = 0.2f; // Need to fix this value
 
         ErrorHandler MaterialManager_Errors;
@@ -52,6 +57,25 @@ namespace _2D_Patankar_Model
             Create_Materials();
         }
 
+        public float Get_Gamma(string material)
+        {
+            float Gamma = -10.0f;
+
+            for (int i = 0; i < Material_List.Count; i++)
+            {
+                if (Material_List[i].Mat_Name == material)
+                {
+                    Gamma = Material_List[i].k;
+                }
+            }
+
+            if (Gamma == -10.0f)
+            {
+                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR:  No match found for material " + material);
+            }
+
+            return Gamma;
+        }
 
         // Create_Materials()
         //
@@ -61,17 +85,17 @@ namespace _2D_Patankar_Model
         {
             MaterialManager_Errors.UpdateProgress_Text("Creating Materials");
             // Number of materials to be created.  Could possibly be pulled from the main UI if necessary.
-            const int n_Materials = 4;
+            const int n_Materials = 5;
 
             // String array to hold the material names for visualization and error reporting
-            string[] MatList_Name = new string[n_Materials] { "Copper", "Glass", "BiTe", "Ceramic" };
+            string[] MatList_Name = new string[n_Materials] { "Copper", "Glass", "BiTe", "Ceramic" , "Air"};
 
             // Float array to hold value of thermal conductivites
-            float[] k = new float[n_Materials] { k_Copper, k_Glass, k_BiTe, k_Ceramic};
+            float[] k = new float[n_Materials] { k_Copper, k_Glass, k_BiTe, k_Ceramic, k_Air};
 
-            float[] rho = new float[n_Materials] { rho_Copper, rho_Glass, rho_BiTe, rho_Ceramic };
+            float[] rho = new float[n_Materials] { rho_Copper, rho_Glass, rho_BiTe, rho_Ceramic, rho_Air };
 
-            float[] cp = new float[n_Materials] { cp_Copper, cp_Glass, cp_BiTe, cp_Ceramic };
+            float[] cp = new float[n_Materials] { cp_Copper, cp_Glass, cp_BiTe, cp_Ceramic, cp_Air };
 
             // Iterates from 0 to n_Materials - 1 to create n_Materials number of Material objects.  
             for (int i = 0; i < n_Materials; i++ )

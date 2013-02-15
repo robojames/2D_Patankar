@@ -25,10 +25,9 @@ namespace _2D_Patankar_Model
 
             TEMGeometry myGeometry = new TEMGeometry(myError);
 
-
             Mesh myMesh = new Mesh(myError, myGeometry.Layer_List);
 
-
+            NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager);
         }
 
         private void Main_Load(object sender, EventArgs e)
@@ -49,6 +48,7 @@ namespace _2D_Patankar_Model
 
         public void UpdateProgress_Text(string status_Text)
         {
+            label1.Text = "";
             label1.Text = "Progress: " + status_Text;
         }
 

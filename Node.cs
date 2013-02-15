@@ -14,75 +14,32 @@ namespace _2D_Patankar_Model
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
         ErrorHandler NodeErrors;
 
+        // Integer to hold the value of the node ID which is unique per each node.  This allows for greater
+        // clarity when reporting node errors
         public int Node_ID;
+
+        public int Layer_ID;
+
+        public string Material;
 
         // Default constructor of Node object 
         // 
         // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
         // to the specification of CV width in both X and Y directions, as well as the physical position on both
         // the x and y axis.  The node indices (i,j) are also specified.
-        public Node(ErrorHandler local_ErrorHandler, float dX, float dY, float x_POS, float y_POS, int ID)
+        public Node(ErrorHandler local_ErrorHandler, float x_POS, float y_POS, int p_Node_ID, int p_Layer_ID)
         {
             NodeErrors = local_ErrorHandler;
-           
-            delta_X = dX;
-            delta_Y = dY;
-
+ 
             x_pos = x_POS;
             y_pos = y_POS;
 
-            Node_ID = ID;
+            Node_ID = p_Node_ID;
 
-            is_Sorted = false;
+            Layer_ID = p_Layer_ID;
+
         }
 
-        // Node index
-        // i - index in the x-direction
-        // j - index in the y-direction
-        private int I;
-        private int J;
-
-        public bool is_Sorted;
-
-        // Accessor function for the x-direction
-        public int i
-        {
-            get
-            {
-                return I;
-            }
-            private set
-            {
-                if (value >= 0)
-                    I = value;
-                else
-                {
-                    I = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Attempt to set node index i to less than 0");
-                }
-
-            }
-        }
-
-        // Accessor function for the j-direction
-        public int j
-        {
-            get
-            {
-                return J;
-            }
-            private set
-            {
-                if (value >= 0)
-                    J = value;
-                else
-                {
-                    J = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Attempt to set node index j to less than 0");
-                }
-
-            }
-        }
 
         // Node Physical Index
         // XPOS - Physical location in the x direction [m]
@@ -104,7 +61,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     XPOS = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Physical x location attempted set to negative value");
+                    NodeErrors.Post_Error("NODE ERROR:  Physical x location attempted set to negative value - Node" + this.Node_ID.ToString());
                 }
             }
         }
@@ -123,7 +80,7 @@ namespace _2D_Patankar_Model
                 else
                 {
                     YPOS = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Physical y location attempted set to negative value");
+                    NodeErrors.Post_Error("NODE ERROR:  Physical y location attempted set to negative value - Node" + this.Node_ID.ToString());
                 }
             }
         }
@@ -189,13 +146,15 @@ namespace _2D_Patankar_Model
                 else
                 {
                     TEMP = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Phi (T) < or equal to zero at Node (" + I.ToString() + ", " + J.ToString() + ")");
+                    NodeErrors.Post_Error("NODE ERROR:  Phi (T) < or equal to zero - Node" + this.Node_ID.ToString());
                 }
             }
         }
 
         // Gamma (Diffusion) Coefficient at this node [unsure]
         private float GAMMA;
+
+        // Accessor Function for Gamma
         public float gamma
         {
             get
@@ -211,11 +170,119 @@ namespace _2D_Patankar_Model
                 else
                 {
                     GAMMA = 0;
-                    NodeErrors.Post_Error("NODE ERROR:  Gamma at Node (" + I.ToString() + ", " + J.ToString() + ") attempted to be set to < 0.");
+                    NodeErrors.Post_Error("NODE ERROR:  Gamma attempted to be set to < 0 - Node" + this.Node_ID.ToString());
                 }
             }
         }
 
+        // d-_-
+        // 
+        // Variable indicated delta_x_E, delta_y_N, delta_x_W, and delta_y_S
+        // which indicate the distance between this node and the neighboring node
+        // in the indicated direction:
+        //
+        // dx_E - distance between this node and the one to the EAST
+        // dx_W - distance between this node and the node to the WEST
+        // dy_N - distance between this node and the node to the NORTH
+        // dy_S - distance between this node and the node to the SOUTH
+        //
+        // These values are assigned via the accessor functions by the NodeInitializer.cs
+        // class.  If no node exists in the indicated directions above the current node
+        // is assumed to be a boundary node and treated as such.
+        private float dx_E;
+        private float dx_W;
+        private float dy_N;
+        private float dy_S;
+
+        // Accessor function for dx_E
+        //
+        //
+        public float delta_x_E
+        {
+            get
+            {
+                return dx_E;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    value = dx_E;
+                }
+                else
+                {
+                    NodeErrors.Post_Error("NODE ERROR:  Value for delta_x_E attempted to be set less than 0 - " + Node_ID.ToString());
+                }
+            }
+        }
+
+        // Accessor function for dx_W
+        //
+        //
+        public float delta_x_W
+        {
+            get
+            {
+                return dx_W;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    value = dx_W;
+                }
+                else
+                {
+                    NodeErrors.Post_Error("NODE ERROR:  Value for delta_x_W attempted to be set less than 0 - " + Node_ID.ToString());
+                }
+            }
+        }
+
+        // Accessor function for dy_N
+        //
+        //
+        public float delta_y_N
+        {
+            get
+            {
+                return dy_N;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    value = dy_N;
+                }
+                else
+                {
+                    NodeErrors.Post_Error("NODE ERROR:  Value for delta_y_N attempted to be set less than 0 - " + Node_ID.ToString());
+                }
+            }
+        }
+
+        // Accessor function for dy_S
+        //
+        //
+        public float delta_y_S
+        {
+            get
+            {
+                return dy_S;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    value = dy_S;
+                }
+                else
+                {
+                    NodeErrors.Post_Error("NODE ERROR:  Value for delta_y_S attempted to be set less than 0 - " + Node_ID.ToString());
+                }
+            }
+        }
+
+        
         public float AE { get; set; }
         public float AP { get; set; }
         public float AN { get; set; }

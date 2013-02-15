@@ -31,9 +31,9 @@ namespace _2D_Patankar_Model
         private const float AIR_Height = 0.00172589f;
 
         private const int n_Nodes_BiTe = 50;
-        private const int n_Nodes_Air = 20;
-        private const int n_Nodes_CE = 50;
-        private const int n_Nodes_Ceramic = 50;
+        private const int n_Nodes_Air = 150;
+        private const int n_Nodes_CE = 150;
+        private const int n_Nodes_Ceramic = 550;
 
         // Series of x0, y0, xf, and yf values (see Rectangle in Layer.cs) provided for
         // reference, and in case the geometry changes slightly
