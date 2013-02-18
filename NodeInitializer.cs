@@ -23,6 +23,8 @@ namespace _2D_Patankar_Model
             Mat_Manager = Materials;
 
             Assign_Materials();
+
+            Calculate_dxdy();
         }
 
         
@@ -38,17 +40,37 @@ namespace _2D_Patankar_Model
             }
 
             Node_I_ErrorHandler.Post_Error("NOTE:  Finished assigning material properties to each node");
-        }
 
-        private void Calculate_dxdy()
-        {
             foreach (Node[] node in NodeArray)
             {
                 foreach (Node ind_node in node)
                 {
-                    // Calculatedxdy
+                    if (ind_node.gamma == 0)
+                    {
+                        Node_I_ErrorHandler.Post_Error("Node Initialization Error:  Gamma set to 0 for Node " + ind_node.Node_ID.ToString());
+                    }
                 }
             }
+        }
+
+        private void Calculate_dxdy()
+        {
+            int boundaryNodes = 0;
+
+            for (int i = 0; i < NodeArray.Count(); i++)
+            {
+                for (int j = 0; j < NodeArray[i].Count(); j++)
+                {
+                    if (NodeArray[i][j].is_Boundary)
+                    {
+                        boundaryNodes++;
+                    }
+
+                }
+
+            }
+
+            Node_I_ErrorHandler.Post_Error("Boundary nodes:  " + boundaryNodes.ToString());
         }
         
     }

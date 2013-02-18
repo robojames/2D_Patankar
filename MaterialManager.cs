@@ -38,9 +38,9 @@ namespace _2D_Patankar_Model
         const float cp_Glass = 835.0f;
 
         // FIX THESE VALUES HAHHHHHH
-        const float rho_Air = 0.0f;
-        const float k_Air = 0.0f;
-        const float cp_Air = 0.0f;
+        const float rho_Air = 25.0f;
+        const float k_Air = 25.0f;
+        const float cp_Air = 25.0f;
 
         const float alpha_BiTE = 0.2f; // Need to fix this value
 

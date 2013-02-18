@@ -89,6 +89,8 @@ namespace _2D_Patankar_Model
                     {
                         layer_Nodes++;
 
+                        
+
                         // Calculates the dX and dY values (can be changed depending on layer)
                         // but currently uses a step offset for the cv width with an otherwise
                         // uniform distribution
@@ -97,6 +99,23 @@ namespace _2D_Patankar_Model
 
                         // Adds Node to NodeList
                         NodeList.Add(new Node(Mesh_Errors, X_POS, Y_POS, t_Nodes, k));
+
+                        if (Check_Boundary(i, j, Layers.Nodes))
+                            NodeList.Last().is_Boundary = true;
+
+
+                        // Sets the Control Volume width for the current node equivalent to the equal spacing
+                        // of the nodes
+                        NodeList.Last().delta_X = Layers.node_Spacing;
+                        NodeList.Last().delta_Y = Layers.node_Spacing;
+
+                        // INITIALIZES the node directions, however, for boundary nodes this initialized
+                        // value will NOT be true, and will need to be manually calculated by the NodeInitializer.cs
+                        // class.
+                        NodeList.Last().delta_x_E = Layers.node_Spacing;
+                        NodeList.Last().delta_x_W = Layers.node_Spacing;
+                        NodeList.Last().delta_y_S = Layers.node_Spacing;
+                        NodeList.Last().delta_y_N = Layers.node_Spacing;
 
                         // Assigns layer material to current node
                         NodeList.Last().Material = Layers.Layer_Material;
@@ -118,16 +137,42 @@ namespace _2D_Patankar_Model
             // Clears Status text on the MainUI
             Mesh_Errors.UpdateProgress_Text("");
 
+
+            
             // Calls the Sort_Nodes function which arranges the nodes into a jagged array Nodes[][]
             // and organizes them with respect to their physical distance from origin.
             Sort_Nodes(NodeList);
         }
 
-        // Sort_Nodes
-        //
-        // Sorts nodes by first eliminating duplicate nodes (typically around half), as well as
-        // arranges them into a jagged array Node[][] which is arranged with respect to the physical distance
-        // in [m] from the origin
+        /// <summary>
+        /// Checks to see if the current node being added is a boundary node
+        /// </summary>
+        /// <param name="i">Node index in the i (x) direction</param>
+        /// <param name="j">Node index in the j (y) direction</param>
+        /// <param name="NODES">Total number of nodes in the system in both (x) and (y) directions</param>
+        /// <returns>Is current node a boundary</returns>
+        private bool Check_Boundary(int i, int j, int NODES)
+        {
+            bool is_Boundary = false;
+
+            if (i == 0)
+                is_Boundary = true;
+            if (i == NODES)
+                is_Boundary = true;
+            if (j == 0)
+                is_Boundary = true;
+            if (j == NODES)
+                is_Boundary = true;
+
+            return is_Boundary;
+        }
+        
+
+        /// <summary>
+        /// Sorts nodes by first eliminating duplicate nodes (typically around half), as well as arranges them into a 
+        /// jagged array Node[][] which is arranged with respect to the physical distance in [m] from the origin
+        /// </summary>
+        /// <param name="NodeList">List of Node objects currently utilized by the system</param>
         private void Sort_Nodes(List<Node> NodeList)
         {
             // Grabs the initial number of nodes passed in via the NodeList
@@ -147,9 +192,13 @@ namespace _2D_Patankar_Model
 
         // ListToJaggedArray
         //
-        // When passed in a sorted NodeList, ListToJaggedArray arranges the nodes into a 2D jagged array 
-        // of Node[][].  This ensures that Node[0][0] is the least node in the (x,y) and Node[0][1] is just
-        // to the right of it, etc.
+        /// <summary>
+        ///          When passed in a sorted NodeList, ListToJaggedArray arranges the nodes into a 2D jagged array 
+        ///          of Node[][].  This ensures that Node[0][0] is the least node in the (x,y) and Node[0][1] is just
+        ///          to the right of it, etc.
+        /// </summary>
+        /// <param name="p_NodeList">Grouped nodes with which to convert to a jagged array for further analysis</param>
+        /// <returns></returns>
         private Node[][] ListtoJaggedArray(IList<IGrouping<float, Node>> p_NodeList)
         {
             // Creates new jagged array to hold NodeList data
@@ -173,6 +222,11 @@ namespace _2D_Patankar_Model
 
         }
 
+        /// <summary>
+        /// Checks the passed in node to see if it is inside the layer bounds
+        /// </summary>
+        /// <param name="node">Current node object to inspect</param>
+        /// <param name="Current_Layer">Current layer in which the node object resides</param>
         private void Check_Node(Node node, Layer Current_Layer)
         {
 

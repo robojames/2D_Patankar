@@ -182,6 +182,28 @@ namespace _2D_Patankar_Model
 
             return dy;
         }
-         
+
+
+        private float NODESPACING;
+        /// <summary>
+        /// Indicates the spacing between each node in both x and y directions
+        /// </summary>
+        public float node_Spacing 
+        {
+            get
+            {
+                NODESPACING = Calc_NodeSpacing();
+                return NODESPACING;
+            }
+
+            private set { value = NODESPACING; }
+        }
+
+        private float Calc_NodeSpacing()
+        {
+            float node_Spacing = (this.Layer_xf - this.Layer_x0) / this.Nodes;
+
+            return node_Spacing;
+        }
     }
 }

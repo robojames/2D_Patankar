@@ -14,11 +14,21 @@ namespace _2D_Patankar_Model
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
         ErrorHandler NodeErrors;
 
-        // Integer to hold the value of the node ID which is unique per each node.  This allows for greater
-        // clarity when reporting node errors
+       
+        /// <summary>
+        /// Integer to hold the value of the node ID which is unique per each node.  This allows for greater clarity when reporting node errors
+        /// </summary>
         public int Node_ID;
 
+        /// <summary>
+        /// Holds value of Layer_ID to which the node belongs.  This allows for easy assignment of material properties, etc.
+        /// </summary>
         public int Layer_ID;
+
+        /// <summary>
+        /// Holds boolean value to describe if the current node is a boundary node or not
+        /// </summary>
+        public bool is_Boundary = false;
 
         public string Material;
 
@@ -92,13 +102,16 @@ namespace _2D_Patankar_Model
         private float DY;
 
         // Accessor function for the CV width in the x direction
+        /// <summary>
+        /// Sets or gets the control volume width in the x-direction
+        /// </summary>
         public float delta_X
         {
             get
             {
                 return DX;
             }
-            private set
+            set
             {
                 if (value >= 0)
                     DX = value;
@@ -111,13 +124,16 @@ namespace _2D_Patankar_Model
         }
 
         // Accessor function for the CV width in the y direction
+        /// <summary>
+        /// Sets or gets the control volume width in the y-direction
+        /// </summary>
         public float delta_Y
         {
             get
             {
                 return DY;
             }
-            private set
+            set
             {
                 if (value >= 0)
                     DY = value;
@@ -175,8 +191,6 @@ namespace _2D_Patankar_Model
             }
         }
 
-        // d-_-
-        // 
         // Variable indicated delta_x_E, delta_y_N, delta_x_W, and delta_y_S
         // which indicate the distance between this node and the neighboring node
         // in the indicated direction:
@@ -195,8 +209,9 @@ namespace _2D_Patankar_Model
         private float dy_S;
 
         // Accessor function for dx_E
-        //
-        //
+        /// <summary>
+        /// Distance between this node and the node to the east
+        /// </summary>
         public float delta_x_E
         {
             get
@@ -207,18 +222,20 @@ namespace _2D_Patankar_Model
             {
                 if (value >= 0)
                 {
-                    value = dx_E;
+                    dx_E = value;
                 }
                 else
                 {
+                    dx_E = 0;
                     NodeErrors.Post_Error("NODE ERROR:  Value for delta_x_E attempted to be set less than 0 - " + Node_ID.ToString());
                 }
             }
         }
 
         // Accessor function for dx_W
-        //
-        //
+        /// <summary>
+        /// Distance between this node and the node to the west
+        /// </summary>
         public float delta_x_W
         {
             get
@@ -229,18 +246,20 @@ namespace _2D_Patankar_Model
             {
                 if (value >= 0)
                 {
-                    value = dx_W;
+                    dx_W = value;
                 }
                 else
                 {
+                    dx_W = 0;
                     NodeErrors.Post_Error("NODE ERROR:  Value for delta_x_W attempted to be set less than 0 - " + Node_ID.ToString());
                 }
             }
         }
 
         // Accessor function for dy_N
-        //
-        //
+        /// <summary>
+        /// Distance between this node and the node to the north
+        /// </summary>
         public float delta_y_N
         {
             get
@@ -251,18 +270,20 @@ namespace _2D_Patankar_Model
             {
                 if (value >= 0)
                 {
-                    value = dy_N;
+                    dy_N = value;
                 }
                 else
                 {
+                    dy_N = 0;
                     NodeErrors.Post_Error("NODE ERROR:  Value for delta_y_N attempted to be set less than 0 - " + Node_ID.ToString());
                 }
             }
         }
 
         // Accessor function for dy_S
-        //
-        //
+        /// <summary>
+        /// Distance between this node and the node to the south
+        /// </summary>
         public float delta_y_S
         {
             get
@@ -273,10 +294,11 @@ namespace _2D_Patankar_Model
             {
                 if (value >= 0)
                 {
-                    value = dy_S;
+                    dy_S = value;
                 }
                 else
                 {
+                    dy_S = 0;
                     NodeErrors.Post_Error("NODE ERROR:  Value for delta_y_S attempted to be set less than 0 - " + Node_ID.ToString());
                 }
             }
