@@ -27,7 +27,7 @@ namespace _2D_Patankar_Model
 
             Mesh myMesh = new Mesh(myError, myGeometry.Layer_List);
 
-            NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager);
+            NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager, myGeometry.Layer_List);
         }
 
         private void Main_Load(object sender, EventArgs e)

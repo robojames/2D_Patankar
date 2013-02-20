@@ -304,7 +304,8 @@ namespace _2D_Patankar_Model
             }
         }
 
-        
+        public int i { get; set; }
+        public int j { get; set; }
         public float AE { get; set; }
         public float AP { get; set; }
         public float AN { get; set; }

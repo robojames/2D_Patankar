@@ -183,6 +183,62 @@ namespace _2D_Patankar_Model
             return dy;
         }
 
+        /// <summary>
+        /// Adjusted X0 used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_X0 
+        { 
+            get
+            {
+                return (this.Layer_Rectangle.x_0 + this.layer_dx);
+            }
+            private set
+            {
+            }
+        }
+        
+        /// <summary>
+        /// Adjusted XF used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_XF
+        {
+            get
+            {
+                return (this.Layer_Rectangle.x_f - this.layer_dx);
+            }
+            private set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Adjusted Y0 used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_Y0
+        {
+            get
+            {
+                return (this.Layer_Rectangle.y_0 - this.layer_dy);
+            }
+            private set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Adjusted YF used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_YF
+        {
+            get
+            {
+                return (this.Layer_Rectangle.y_f + this.layer_dy);
+            }
+            private set
+            {
+            }
+        }
+
 
         private float NODESPACING;
         /// <summary>

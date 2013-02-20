@@ -89,8 +89,6 @@ namespace _2D_Patankar_Model
                     {
                         layer_Nodes++;
 
-                        
-
                         // Calculates the dX and dY values (can be changed depending on layer)
                         // but currently uses a step offset for the cv width with an otherwise
                         // uniform distribution
@@ -215,6 +213,15 @@ namespace _2D_Patankar_Model
             for (var i = 0; i < result[i].Count(); i++)
             {
                 Mesh_Errors.Post_Error("NOTE:  Final Array is Node[" + result.Count().ToString() + ", " + result[i].Count().ToString() + "]");
+            }
+
+            for (int i = 0; i < result.Count(); i++)
+            {
+                for (int j = 0; j < result[i].Count(); j++)
+                {
+                    result[i][j].i = i;
+                    result[i][j].j = j;
+                }
             }
 
             // Returns Node[][] to user
