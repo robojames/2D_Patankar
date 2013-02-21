@@ -12,6 +12,9 @@ namespace _2D_Patankar_Model
     class Node
     {
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
+        /// <summary>
+        /// Passes error messages to the Main UI
+        /// </summary>
         ErrorHandler NodeErrors;
 
        
@@ -30,6 +33,9 @@ namespace _2D_Patankar_Model
         /// </summary>
         public bool is_Boundary = false;
 
+        /// <summary>
+        /// Material string that indicates the material of this node for later conductivity retrieval
+        /// </summary>
         public string Material;
 
         // Default constructor of Node object 
@@ -37,6 +43,14 @@ namespace _2D_Patankar_Model
         // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
         // to the specification of CV width in both X and Y directions, as well as the physical position on both
         // the x and y axis.  The node indices (i,j) are also specified.
+        /// <summary>
+        /// Node Constructor 
+        /// </summary>
+        /// <param name="local_ErrorHandler">ErrorHandler to pass messages to the main UI</param>
+        /// <param name="x_POS">Physical location in the x-direction [m]</param>
+        /// <param name="y_POS">Physical location in the y-direction [m]</param>
+        /// <param name="p_Node_ID">Node ID (starts at 0 to N_Nodes)</param>
+        /// <param name="p_Layer_ID">Layer at which this created node resides</param>
         public Node(ErrorHandler local_ErrorHandler, float x_POS, float y_POS, int p_Node_ID, int p_Layer_ID)
         {
             NodeErrors = local_ErrorHandler;
@@ -58,6 +72,9 @@ namespace _2D_Patankar_Model
         private float YPOS;
 
         // Accessor function for the physical x direction
+        /// <summary>
+        /// X Position in meters on the physical plane
+        /// </summary>
         public float x_pos
         {
             get
@@ -77,6 +94,9 @@ namespace _2D_Patankar_Model
         }
 
         // Accessor function for the physical y direction
+        /// <summary>
+        /// Y Position in meters on the physical plane
+        /// </summary>
         public float y_pos
         {
             get
@@ -149,6 +169,10 @@ namespace _2D_Patankar_Model
         //
         // TEMP - Temperature at this node
         private float TEMP;
+
+        /// <summary>
+        /// Temperature at this node
+        /// </summary>
         public float T
         {
             get
@@ -171,6 +195,9 @@ namespace _2D_Patankar_Model
         private float GAMMA;
 
         // Accessor Function for Gamma
+        /// <summary>
+        /// Diffusion Coefficient for this node
+        /// </summary>
         public float gamma
         {
             get
@@ -304,19 +331,69 @@ namespace _2D_Patankar_Model
             }
         }
 
+        /// <summary>
+        /// Index in the x direction for this particular node
+        /// </summary>
         public int i { get; set; }
+
+        /// <summary>
+        /// Indext in the y direction for this particular node
+        /// </summary>
         public int j { get; set; }
+
+        /// <summary>
+        /// Influence coefficient of the node EAST of this node
+        /// </summary>
         public float AE { get; set; }
+
+        /// <summary>
+        /// Influence coefficient of this node
+        /// </summary>
         public float AP { get; set; }
+
+        /// <summary>
+        /// Influence coefficient of the node to the NORTH of this node
+        /// </summary>
         public float AN { get; set; }
+
+        /// <summary>
+        /// Influence coefficient of the node to the SOUTH of this node
+        /// </summary>
         public float AS { get; set; }
+
+        /// <summary>
+        /// Influence coefficient of the node to the WEST of this node
+        /// </summary>
         public float AW { get; set; }
 
+        /// <summary>
+        /// Phi (Temperature) for this node.  Currently duplicated via T [NEED TO FIX]
+        /// </summary>
         public float phi { get; set; }
+
+        /// <summary>
+        /// Solution value, P
+        /// </summary>
         public float P { get; set; }
+
+        /// <summary>
+        /// Solution value Q
+        /// </summary>
         public float Q { get; set; }
+
+        /// <summary>
+        /// Non temperature dependent source term
+        /// </summary>
         public float sc { get; set; }
+
+        /// <summary>
+        /// Temperature dependent source term
+        /// </summary>
         public float sp { get; set; }
+
+        /// <summary>
+        /// Solution vector term
+        /// </summary>
         public float d { get; set; }
     }
 }

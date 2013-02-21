@@ -235,7 +235,6 @@ namespace _2D_Patankar_Model
                         delta_X = val;
                 }
             }
-
             return delta_X;
         }
 

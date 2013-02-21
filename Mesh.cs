@@ -37,19 +37,43 @@ namespace _2D_Patankar_Model
         //
         // The maximum y-direction is governed by the entire height of the microDTA
         // apparatus, from the base ceramic of the TEM to the thermocouple and beyond.
+        /// <summary>
+        /// Maximum x-direction [m]
+        /// </summary>
         const float max_X = 0.0401828f;
+
+        /// <summary>
+        /// Maximum y-direction [m]
+        /// </summary>
         const float max_Y = 0.004864f;
 
         // Total number of nodes in physical system
+        /// <summary>
+        /// Total number of nodes utilized in the physical system
+        /// </summary>
         private int t_Nodes;
 
+        /// <summary>
+        /// List of Nodes with which to temporarily store nodes prior to conversion to jagged array
+        /// </summary>
         private List<Node> NodeList;
 
+        /// <summary>
+        /// Jagged array of nodes which is utilized during the rest of the analysis, organized by spatial distance from origin
+        /// </summary>
         public Node[][] NodeArray;
 
         // Errorhandler class to handle errors with mesh calculations
+        /// <summary>
+        /// Local errorhandler
+        /// </summary>
         ErrorHandler Mesh_Errors;
 
+        /// <summary>
+        /// Mesh Constructor
+        /// </summary>
+        /// <param name="local_ErrorHandler">Main UI ErrorHandler</param>
+        /// <param name="LayerList">LayerList generated via the custom Geometry class files (TEMGeometry.cs for example)</param>
         public Mesh(ErrorHandler local_ErrorHandler, List<Layer> LayerList)
         {
             Mesh_Errors = local_ErrorHandler;
@@ -62,6 +86,10 @@ namespace _2D_Patankar_Model
         }
 
         // Main subroutine which generates the mesh, given XNODES and YNODES
+        /// <summary>
+        /// Generates the nodal mesh
+        /// </summary>
+        /// <param name="LayerList">List of layers which is iterated over to generate the nodal mesh</param>
         private void Generate_Mesh_ByLayer(List<Layer> LayerList)
         {
             Mesh_Errors.UpdateProgress_Text("Meshing...");

@@ -16,12 +16,23 @@ namespace _2D_Patankar_Model
         // Need to implement Material Properties as F(T) as well
         
         // Declare ErrorHandler object to display errors to the user
+        /// <summary>
+        /// ErrorHandler to pass messages to the main UI
+        /// </summary>
         ErrorHandler Material_Errors;
 
         // String to cover the name of the material
+        /// <summary>
+        /// Material name (string)
+        /// </summary>
         public string Mat_Name { get; private set; }
 
         // Constructor, currently requires the passing of the local ErrorHandler (on the main form) and the Material Name
+        /// <summary>
+        /// Material Constructor
+        /// </summary>
+        /// <param name="local_ErrorHandler">Main UI ErrorHandler</param>
+        /// <param name="Material_Name">String name to assign to material, ie "Copper"</param>
         public Material(ErrorHandler local_ErrorHandler, string Material_Name)
         {
             Material_Errors = local_ErrorHandler;
@@ -48,6 +59,9 @@ namespace _2D_Patankar_Model
         //
         // Specific Heat Capacity (Constant Pressure) [J / kg K]
         //
+        /// <summary>
+        /// Specific Heat Capacity (Constant Pressure) [J / kg K]
+        /// </summary>
         public float cp
         {
             get
@@ -70,6 +84,9 @@ namespace _2D_Patankar_Model
         //
         // Thermal Conductivity (W / m K)
         //
+        /// <summary>
+        /// Thermal Conductivity [W / m K]
+        /// </summary>
         public float k
         {
             get
@@ -91,6 +108,9 @@ namespace _2D_Patankar_Model
         //
         // Seebeck Coefficient (V / K), Note:  Need to check to see if p and n values are used, or if Alpha_P = Alpha_N = Alpha.
         //
+        /// <summary>
+        /// Seebeck Coefficient [V / K]
+        /// </summary>
         public float alpha
         {
             get
@@ -112,6 +132,9 @@ namespace _2D_Patankar_Model
         //
         // Density (kg/m^3)
         //
+        /// <summary>
+        /// Density, [kg / m^3]
+        /// </summary>
         public float rho
         {
             get

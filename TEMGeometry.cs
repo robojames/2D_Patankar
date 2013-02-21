@@ -8,45 +8,113 @@ namespace _2D_Patankar_Model
 {
     class TEMGeometry
     {
-        // Local ErrorHandler to pass through errors to the main UI
+        
+        /// <summary>
+        /// Local ErrorHandler to pass through errors to the main UI
+        /// </summary>
         ErrorHandler Geometry_Errors;
 
-        // List of Layer objects that comprise the entire geometry of the TEM
+        /// <summary>
+        /// List of layer objects that comprise the entire geometry of the TEM
+        /// </summary>
         public List<Layer> Layer_List;
 
-        // Integer to hold the value of the number of specified coordinates
+        /// <summary>
+        /// Holds values of number of coordinate pairs
+        /// </summary>
         private int n_Coords;
 
-        // Number of BiTE elements present on the TEM.  Some (x0,y0) or (xf,yf) values may
-        // need updating if this value is changed for accurate representation
+        /// <summary>
+        /// Number of BiTE elements present on the TEM.  If this value is changed, the ceramic
+        /// alumina plates will have to be updated as the sizes will no longer match up
+        /// </summary>
         private const int n_elements = 18;
 
         // Series of constants defining in meters the thicknesses and widths of various
         // repetitive layers for easy loop-generation of the geometry
+
+        /// <summary>
+        /// Thickness of the BiTE elements [m] in x-direction
+        /// </summary>
         private const float BiTE_Thickness = 0.001397f;
+
+        /// <summary>
+        /// Thickness of the airgap between BiTe Elements [m]
+        /// </summary>
         private const float BiTE_AirGap = 0.000762f;
+
+        /// <summary>
+        /// Height of the BiTe elements [m]
+        /// </summary>
         private const float BiTE_Height = 0.0013208f;
+
+        /// <summary>
+        /// Copper connector widths [m] in the x-direction
+        /// </summary>
         private const float CE_Width = 0.003556f;
+
+        /// <summary>
+        /// Copper connector thickness [m] in the y-direction
+        /// </summary>
         private const float CE_Thickness = 0.00041910f;
+
+        /// <summary>
+        /// Height of the air gap
+        /// </summary>
         private const float AIR_Height = 0.00172589f;
 
+        /// <summary>
+        /// Number of nodes for the BiTe elements
+        /// </summary>
         private const int n_Nodes_BiTe = 50;
+
+        /// <summary>
+        /// Number of nodes for the air elements
+        /// </summary>
         private const int n_Nodes_Air = 150;
+
+        /// <summary>
+        /// Number of nodes for the copper connector elements
+        /// </summary>
         private const int n_Nodes_CE = 150;
+
+        /// <summary>
+        /// Number of nodes for each ceramic alumina plate
+        /// </summary>
         private const int n_Nodes_Ceramic = 550;
 
         // Series of x0, y0, xf, and yf values (see Rectangle in Layer.cs) provided for
         // reference, and in case the geometry changes slightly
+        /// <summary>
+        /// Refer to documentation for the specific positioning of these values and their significance.
+        /// 
+        /// DO NOT CHANGE
+        /// </summary>
         private float[] x_0 = new float[4] { 0, 0.001016f, 0.001016f, 0.001016f};
+
+        /// <summary>
+        /// Refer to documentation for the specific positioning of these values and their significance.
+        /// </summary>
         private float[] y_0 = new float[4] { 0.000635f, 0.0010541f, 0.0023749f, 0.00277999f};
 
+        /// <summary>
+        /// Refer to documentation for the specific positioning of these values and their significance.
+        /// </summary>
         private float[] x_f = new float[4] { 0.03997960f, 0.002413f, 0.002413f, 0.004572f};
+
+        /// <summary>
+        /// Refer to documentation for the specific positioning of these values and their significance.
+        /// </summary>
         private float[] y_f = new float[4] { 0, 0.000635f, 0.0010541f, 0.00236089f};
 
         // Constructor for the TEMGeometry.cs class.  Requires passing in of the local error
         // handler but nothing else.  Every other value is generated from other classes as
         // the TEMGeometry is very specific.  This file is one of the few that might require
         // editing as the solution process marches on
+        /// <summary>
+        /// Constructor for TEM Geometry
+        /// </summary>
+        /// <param name="localErrorHandler">Main UI ErrorHandler</param>
         public TEMGeometry(ErrorHandler localErrorHandler)
         {
             Geometry_Errors = localErrorHandler;
@@ -78,6 +146,10 @@ namespace _2D_Patankar_Model
         // GenerateGeometry
         //
         // Main function which generates the geometry of the TEM, and organizes it into a list of layers
+        /// <summary>
+        /// Generates geometry of the TEM, which is essentially a list of rectangular coordinates
+        /// </summary>
+        /// <returns>List (array) of Layer objects</returns>
         public List<Layer> GenerateGeometry()
         {
             // Update MainUI (ie, the user) with the progress of the geometry generation
@@ -173,6 +245,9 @@ namespace _2D_Patankar_Model
         //
         // Checks each layer for coordinate issues.  Pair interactions have already been checked within the 
         // Layer.cs function, however, calculated areas (among other properties) have not at this point.
+        /// <summary>
+        /// Check each points to ensure that calculates mesh area for a given layer is not negative
+        /// </summary>
         public void CheckPoints()
         {
             foreach (Layer Mesh_Layer in Layer_List)

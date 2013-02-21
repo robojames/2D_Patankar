@@ -21,35 +21,101 @@ namespace _2D_Patankar_Model
         // cp_XX = Heat Capacity of Material XX [J/kgK]
         // alpha_XX = Seebeck Coefficient of Material XX [V/K]
 
+        /// <summary>
+        /// Density of Copper [kg/m^3] at 20 C
+        /// </summary>
         const float rho_Copper = 8960.0f;
+
+        /// <summary>
+        /// Thermal Conductivity of Copper [W / m K] at 20 C
+        /// </summary>
         const float k_Copper = 401.0f;
+
+        /// <summary>
+        /// Heat Capacity of Copper [J/kg K] at 20 C
+        /// </summary>
         const float cp_Copper = 390.0f;
 
+        /// <summary>
+        /// Density of Ceramic Alumina used in TEM [kg/m^3] at 20 C
+        /// </summary>
         const float rho_Ceramic = 3750.0f;
+
+        /// <summary>
+        /// Thermal Conductivity of Ceramic Alumina used in TEM [W / m K] at 20 C
+        /// </summary>
         const float k_Ceramic = 35.0f;
+        
+        /// <summary>
+        /// Heat Capacity of Ceramic Alumina used in TEM [J/kg K] at 20 C
+        /// </summary>
         const float cp_Ceramic = 775.0f;
 
+        /// <summary>
+        /// Density of Bismuth Telluride [kg/m^3] at 20 C
+        /// </summary>
         const float rho_BiTe = 7700.0f;
+
+        /// <summary>
+        /// Thermal Conductivity of Bismuth Telluride [W / m K] at 20 C
+        /// </summary>
         const float k_BiTe = 1.48f;
+        
+        /// <summary>
+        /// Heat Capacity of Bismuth Telluride [J/kg K] at 20 C
+        /// </summary>
         const float cp_BiTe = 122.0f;
         
+        /// <summary>
+        /// Density of glass [kg/m^3] at 20 C
+        /// </summary>
         const float rho_Glass = 2225.0f;
+        
+        /// <summary>
+        /// Thermal Conductivity of Glass [W / m K] at 20 C
+        /// </summary>
         const float k_Glass = 14.0f;
+
+        /// <summary>
+        /// Heat Capacity of glass [J/kg K] at 20 C
+        /// </summary>
         const float cp_Glass = 835.0f;
 
         // FIX THESE VALUES HAHHHHHH
+        
+        /// <summary>
+        /// Density of Air [kg/m^3] at 20 C
+        /// </summary>
         const float rho_Air = 25.0f;
+
+        /// <summary>
+        /// Thermal Conductivity of Air [W / m K] at 20 C
+        /// </summary>
         const float k_Air = 25.0f;
+
+        /// <summary>
+        /// Heat Capacity of air [J/kg K] at 20 C
+        /// </summary>
         const float cp_Air = 25.0f;
 
         const float alpha_BiTE = 0.2f; // Need to fix this value
 
+        /// <summary>
+        /// Errorhandler to pass messages to the main UI
+        /// </summary>
         ErrorHandler MaterialManager_Errors;
 
+        /// <summary>
+        /// Material list for passing into other sub-classes
+        /// </summary>
         public List<Material> Material_List;
 
         // Default constructor for the MaterialManager class.  Error handler is passed in to allow for reporting of errors
         // through the base class, Material.
+        /// <summary>
+        /// Manages Materials, eventually to be updated to include temperature based thermophysical property interpolation
+        /// </summary>
+        /// <param name="local_ErrorHandler">Main UI ErrorHandler</param>
         public MaterialManager(ErrorHandler local_ErrorHandler)
         {
             MaterialManager_Errors = local_ErrorHandler;
@@ -57,6 +123,11 @@ namespace _2D_Patankar_Model
             Create_Materials();
         }
 
+        /// <summary>
+        /// Iterates over the material list and finds a match to the passed in string, returning its thermal conductivity
+        /// </summary>
+        /// <param name="material">Passed in material string, ie "Air"</param>
+        /// <returns>Thermal Conductivity</returns>
         public float Get_Gamma(string material)
         {
             float Gamma = -10.0f;
@@ -78,9 +149,11 @@ namespace _2D_Patankar_Model
         }
 
         // Create_Materials()
-        //
-        // Initializes materials utilized in the numeric simulation.  Currently set up to allow for the determination of constant thermal conductivities
-        // though a simple modification to the material class will allow for eventual interpolation of the thermal conductivity
+        /// <summary>
+        /// Initializes materials utilized in the numeric simulation.  Currently set up to allow for the determination 
+        /// of constant thermal conductivities though a simple modification to the material class will allow for eventual 
+        /// interpolation of the thermal conductivity 
+        /// </summary>
         private void Create_Materials()
         {
             MaterialManager_Errors.UpdateProgress_Text("Creating Materials");
@@ -126,9 +199,6 @@ namespace _2D_Patankar_Model
 
         }
 
-        
-
-       
 
     }
 }
