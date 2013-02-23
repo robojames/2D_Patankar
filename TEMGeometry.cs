@@ -8,7 +8,6 @@ namespace _2D_Patankar_Model
 {
     class TEMGeometry
     {
-        
         /// <summary>
         /// Local ErrorHandler to pass through errors to the main UI
         /// </summary>
@@ -66,7 +65,7 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Number of nodes for the BiTe elements
         /// </summary>
-        private const int n_Nodes_BiTe = 50;
+        private const int n_Nodes_BiTe = 100;
 
         /// <summary>
         /// Number of nodes for the air elements
@@ -76,12 +75,12 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Number of nodes for the copper connector elements
         /// </summary>
-        private const int n_Nodes_CE = 150;
+        private const int n_Nodes_CE = 100;
 
         /// <summary>
         /// Number of nodes for each ceramic alumina plate
         /// </summary>
-        private const int n_Nodes_Ceramic = 550;
+        private const int n_Nodes_Ceramic = 150;
 
         // Series of x0, y0, xf, and yf values (see Rectangle in Layer.cs) provided for
         // reference, and in case the geometry changes slightly

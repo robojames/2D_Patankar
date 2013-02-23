@@ -9,6 +9,9 @@ namespace _2D_Patankar_Model
 {
     class NodeInitializer
     {
+        float max_X;
+        float max_Y;
+
         /// <summary>
         /// Local ErrorHandler to pass messages to the main UI
         /// </summary>
@@ -34,6 +37,10 @@ namespace _2D_Patankar_Model
         /// </summary>
         float y_MinpDY;
 
+        float x_Max_DX;
+        float y_Max_DY;
+
+
         /// <summary>
         /// Material manager object which holds current materials being utilized in the numeric study
         /// </summary>
@@ -48,6 +55,34 @@ namespace _2D_Patankar_Model
         /// <param name="Layers">List of Layers holding material information for each node inside of it</param>
         public NodeInitializer(Node[][] Nodes, ErrorHandler local_ErrorHandler, MaterialManager Materials, List<Layer> Layers)
         {
+            x_Max_DX = 0.0f;
+            y_Max_DY = 0.0f;
+
+            max_X = 0.0f;
+            max_Y = 0.0f;
+
+            foreach (Node[] node_array in Nodes)
+            {
+                foreach (Node node in node_array)
+                {
+                    if (node.x_pos > x_Max_DX)
+                        x_Max_DX = node.x_pos;
+
+                    if (node.y_pos > y_Max_DY)
+                        y_Max_DY = node.y_pos;
+
+                }
+            }
+
+            foreach (Layer layer in Layers)
+            {
+                if (layer.Layer_xf > max_X)
+                    max_X = layer.Layer_xf;
+                if (layer.Layer_y0 > max_Y)
+                    max_Y = layer.Layer_y0;
+            }
+            
+       
             LayerList = Layers;
 
             NodeArray = Nodes;
@@ -58,10 +93,53 @@ namespace _2D_Patankar_Model
 
             x_MinpDX = Nodes[0][0].x_pos;
             y_MinpDY = Nodes[0][0].y_pos;
-
+            
             Assign_Materials();
 
-            Calculate_dxdy();
+            Calculate_DxDy();
+
+            Initialize_Influence_Coefficients(Nodes);
+        }
+
+        private void Initialize_Influence_Coefficients(Node[][] Nodes)
+        {
+            List<Node> BoundaryNodes = new List<Node>();
+
+            foreach (Node[] Node_Array in Nodes)
+            {
+                foreach (Node node in Node_Array)
+                {
+                    node.Initialize_Influence_Coefficients();
+
+                    if (node.is_Boundary)
+                    {
+                        BoundaryNodes.Add(node); 
+                    }
+                }
+            }
+
+            int boundary_Counter = 0;
+            int s_boundary_Counter = 0;
+
+            // Need to iterate through Boundary_Nodes, to find nearest material to boundary nodes
+            foreach (Node b_Node in BoundaryNodes)
+            {
+                if (LayerList[b_Node.Layer_ID].Layer_Material != b_Node.Boundary_Material && b_Node.Boundary_Material != "")
+                {
+                    boundary_Counter++;
+                }
+
+                if (LayerList[b_Node.Layer_ID].Layer_Material == b_Node.Boundary_Material && b_Node.Boundary_Material != "")
+                {
+                    s_boundary_Counter++;
+                }
+            }
+
+            Node_I_ErrorHandler.Post_Error("NOTE: " + boundary_Counter.ToString() + " number of material boundaries detected with " + s_boundary_Counter.ToString() +
+                " boundary materials matching their own material");
+
+            
+            Node_I_ErrorHandler.Post_Error("NOTE:  Finished Initializing Influence Coefficients");
         }
 
         /// <summary>
@@ -95,8 +173,10 @@ namespace _2D_Patankar_Model
         /// Calculate the CV widths and delta_x_DIRECTION's for each boundary node which takes
         /// into account the interfacial phenomenon
         /// </summary>
-        private void Calculate_dxdy()
+        private void Calculate_DxDy()
         {
+            int nodes_Adjusted = 0;
+
             List<Node> BoundaryNodes = new List<Node>();
 
             for (int i = 0; i < NodeArray.Count(); i++)
@@ -172,36 +252,52 @@ namespace _2D_Patankar_Model
             Node_I_ErrorHandler.UpdateProgress_Text("Correcting Boundary Nodes");
 
             int percent_Progress = 0;
-
-            
+            int x_Pos_Matches = 0;
+            int y_Pos_Matches = 0;
 
             // Still need to correct for nodes at x=xmin and y=ymax
             foreach (Node node in BoundaryNodes)
             {
                 Node_I_ErrorHandler.UpdateProgress((int)(100 * ((float)(percent_Progress) / (float)(BoundaryNodes.Count))));
 
-                if (LayerList[node.Layer_ID].adjusted_X0 == node.x_pos && node.x_pos != x_MinpDX)
+                if (node.x_pos == LayerList[node.Layer_ID].adjusted_X0 && node.x_pos < x_Max_DX)
                 {
                     // Adjust delta_x_W
-                    node.delta_x_W = FindClosestBoundary_X(node, Positions_X);
+                    if (LayerList[node.Layer_ID].Layer_x0 > 0)
+                    {
+                        node.delta_x_W = FindClosestBoundary_X(node, Positions_X);
+                        nodes_Adjusted++;
+                    }
                 }
 
-                if (LayerList[node.Layer_ID].adjusted_XF == node.x_pos && node.x_pos != x_MinpDX)
+                if (node.x_pos == LayerList[node.Layer_ID].adjusted_XF && node.x_pos > x_MinpDX)
                 {
                     // Adjust delta_x_E
-                    node.delta_x_E = FindClosestBoundary_X(node, Positions_X);
+                    if (LayerList[node.Layer_ID].Layer_xf < max_X)
+                    {
+                        node.delta_x_E = FindClosestBoundary_X(node, Positions_X);
+                        nodes_Adjusted++;
+                    }
                 }
 
-                if (LayerList[node.Layer_ID].adjusted_Y0 == node.y_pos && node.y_pos != y_MinpDY)
+                if (LayerList[node.Layer_ID].adjusted_Y0 == node.y_pos && node.y_pos < y_Max_DY)
                 {
                     // Adjust delta_y_N
-                    node.delta_y_N = FindClosestBoundary_Y(node, Positions_Y);
+                    if (LayerList[node.Layer_ID].Layer_y0 < max_Y)
+                    {
+                        node.delta_y_N = FindClosestBoundary_Y(node, Positions_Y);
+                        nodes_Adjusted++;
+                    }
                 }
 
-                if (LayerList[node.Layer_ID].adjusted_YF == node.y_pos && node.y_pos != y_MinpDY)
+                if (LayerList[node.Layer_ID].adjusted_YF == node.y_pos && node.y_pos > y_MinpDY)
                 {
                     // Adjust delta_y_S
-                    node.delta_y_S = FindClosestBoundary_Y(node, Positions_Y);
+                    if (LayerList[node.Layer_ID].Layer_yf > 0)
+                    {
+                        node.delta_y_S = FindClosestBoundary_Y(node, Positions_Y);
+                        nodes_Adjusted++;
+                    }
                 }
 
                 percent_Progress++;
@@ -211,7 +307,9 @@ namespace _2D_Patankar_Model
 
             Node_I_ErrorHandler.UpdateProgress_Text("");
 
-            Node_I_ErrorHandler.Post_Error("Boundary nodes:  " + BoundaryNodes.Count.ToString());
+            Node_I_ErrorHandler.Post_Error("NOTE:  Total Boundary nodes:  " + BoundaryNodes.Count.ToString());
+
+            Node_I_ErrorHandler.Post_Error("NOTE:  Nodes Adjusted (minus nodes at Domain edges):  " + nodes_Adjusted.ToString());
         }
 
         /// <summary>
@@ -221,22 +319,36 @@ namespace _2D_Patankar_Model
         /// <param name="node">Node object's position is used to calculate the distance from a list of positions</param>
         /// <param name="Positions">List of positions to be checked</param>
         /// <returns>Distance in meters of the closest nodal boundary</returns>
-        private float FindClosestBoundary_X(Node node, List<float> Positions)
+        private float FindClosestBoundary_X(Node node, List<float> Positions) // This currently has issues as it could be picking from vertical dimensions (slight changes)
         {
             float delta_X = 100.0f;
 
+            Layer currentLayer = LayerList[node.Layer_ID];
+
             foreach (float pos in Positions)
             {
-                if (pos != node.x_pos)
+
+                if (pos < currentLayer.Layer_x0 | pos > currentLayer.Layer_xf)
                 {
                     float val = Math.Abs(node.x_pos - pos);
 
                     if (val < delta_X)
+                    {
                         delta_X = val;
+                    }
                 }
+
             }
+
+            if (delta_X == 100.0f)
+            {
+                Node_I_ErrorHandler.Post_Error("NODE INITIALIZATION ERROR:  DELTA_X SET INCORRECTLY");
+            }
+
             return delta_X;
         }
+
+
 
         /// <summary>
         /// Finds the closest boundary position (either vertical (Y) or horizontal (X)) to the passed
@@ -247,21 +359,56 @@ namespace _2D_Patankar_Model
         /// <returns>Distance in meters of closest nodal boundary</returns>
         private float FindClosestBoundary_Y(Node node, List<float> Positions)
         {
-            float delta_X = 100.0f;
+            float delta_Y = 100.0f;
+
+            Layer currentLayer = LayerList[node.Layer_ID];
 
             foreach (float pos in Positions)
             {
-                if (pos != node.x_pos)
+                if (pos != node.y_pos)
                 {
-                    float val = Math.Abs(node.x_pos - pos);
+                    if (pos < currentLayer.Layer_yf | pos > currentLayer.Layer_y0)
+                    {
+                        float val = Math.Abs(node.y_pos - pos);
 
-                    if (val < delta_X)
-                        delta_X = val;
+                        if (val < delta_Y)
+                        {
+                            delta_Y = val;
+                        }
+                    }
                 }
             }
 
-            return delta_X;
+            if (delta_Y == 100.0f)
+            {
+                Node_I_ErrorHandler.Post_Error("NODE INITIALIZATION ERROR:  DELTA_Y SET INCORRECTLY");
+            }
+
+            return delta_Y;
         }
-        
+
+        public string checkRectangle(float xPOS, float yPOS)
+        {
+            string sMat = "";
+
+            foreach (Layer layer in LayerList)
+            {
+                if (layer.Layer_x0 <= xPOS && layer.Layer_y0 >= yPOS)
+                {
+                    if (layer.Layer_xf >= xPOS && layer.Layer_yf <= yPOS)
+                    {
+                        sMat = layer.Layer_Material;
+                    }
+
+                }
+            }
+
+            if (sMat == "")
+            {
+                Node_I_ErrorHandler.Post_Error("NODE INITIALIZATION ERROR:  No material match found");
+            }
+
+            return sMat;
+        }
     }
 }

@@ -17,6 +17,7 @@ namespace _2D_Patankar_Model
         /// </summary>
         ErrorHandler NodeErrors;
 
+        public string Boundary_Material;
        
         /// <summary>
         /// Integer to hold the value of the node ID which is unique per each node.  This allows for greater clarity when reporting node errors
@@ -395,5 +396,21 @@ namespace _2D_Patankar_Model
         /// Solution vector term
         /// </summary>
         public float d { get; set; }
+
+
+        public void Initialize_Influence_Coefficients()
+        {
+            // Should only be called after the delta_x_'s have been
+            // corrected to allow for boundary nodes changes.  In addition,
+            // these calculated values will be wrong for the boundary nodes,
+            // and will need to be fixed via the NodeInitializer.cs class.
+            this.AE = (this.gamma * this.DY) / (this.delta_x_E);
+            this.AW = (this.gamma * this.DY) / (this.delta_x_W);
+
+            this.AN = (this.gamma * this.DX) / (this.delta_y_N);
+            this.AS = (this.gamma * this.DX) / (this.delta_y_S);
+
+            this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY);
+        }
     }
 }

@@ -12,12 +12,12 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Maximum x-direction [m]
         /// </summary>
-        private const float x_max = 0.0401828f;
+        public const float x_max = 0.0401828f;
 
         /// <summary>
         /// Maximum y-direction [m]
         /// </summary>
-        private const float y_max = 0.004864f;
+        public const float y_max = 0.004864f;
 
         
         /// <summary>
