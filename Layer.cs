@@ -233,7 +233,7 @@ namespace _2D_Patankar_Model
         /// </summary>
         /// <param name="i">Current node out of N_Nodes</param>
         /// <returns>Node Positioning in the x-direction [m]</returns>
-        public float dX(float i)
+        public float X(float i)
         {
             this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (float)Nodes;
 
@@ -241,6 +241,9 @@ namespace _2D_Patankar_Model
             float XF = this.Layer_Rectangle.x_f - this.layer_dx;
 
             float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f)) * i;
+
+            if (dx <= 0)
+                Layer_Errors.Post_Error("Layer Error:  X position for a node set <= 0");
 
             return dx;
         }
@@ -251,7 +254,7 @@ namespace _2D_Patankar_Model
         /// </summary>
         /// <param name="i">Current node out of N_Nodes</param>
         /// <returns>Node positioning in the y-direction</returns>
-        public float dY(float i)
+        public float Y(float i)
         {
             this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (float)Nodes;
 
@@ -259,6 +262,9 @@ namespace _2D_Patankar_Model
             float YF = this.Layer_Rectangle.y_f + this.layer_dy;
 
             float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
+
+            if (dy <= 0)
+                Layer_Errors.Post_Error("Layer Error:  Y position for a node set <= 0");
 
             return dy;
         }

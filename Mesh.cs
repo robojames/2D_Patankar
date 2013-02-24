@@ -120,8 +120,8 @@ namespace _2D_Patankar_Model
                         // Calculates the dX and dY values (can be changed depending on layer)
                         // but currently uses a step offset for the cv width with an otherwise
                         // uniform distribution
-                        float X_POS = Layers.dX((float)i);
-                        float Y_POS = Layers.dY((float)j);
+                        float X_POS = Layers.X((float)i);
+                        float Y_POS = Layers.Y((float)j);
 
                         // Adds Node to NodeList
                         NodeList.Add(new Node(Mesh_Errors, X_POS, Y_POS, t_Nodes, k));

@@ -9,7 +9,14 @@ namespace _2D_Patankar_Model
 {
     class NodeInitializer
     {
+        /// <summary>
+        /// Calculated (during object construction) maximum physical x position in meters
+        /// </summary>
         float max_X;
+
+        /// <summary>
+        /// Calculated (during object construction) maximum physical y position in meters
+        /// </summary>
         float max_Y;
 
         /// <summary>
@@ -37,7 +44,14 @@ namespace _2D_Patankar_Model
         /// </summary>
         float y_MinpDY;
 
+        /// <summary>
+        /// Maximum x nodal position [m]
+        /// </summary>
         float x_Max_DX;
+
+        /// <summary>
+        /// Maximum y nodal position [m]
+        /// </summary>
         float y_Max_DY;
 
 
@@ -101,6 +115,10 @@ namespace _2D_Patankar_Model
             Initialize_Influence_Coefficients(Nodes);
         }
 
+        /// <summary>
+        /// Initializes influence coefficients for each node passed in
+        /// </summary>
+        /// <param name="Nodes">Jagged 2D array of nodes</param>
         private void Initialize_Influence_Coefficients(Node[][] Nodes)
         {
             List<Node> BoundaryNodes = new List<Node>();
@@ -121,6 +139,10 @@ namespace _2D_Patankar_Model
             int boundary_Counter = 0;
             int s_boundary_Counter = 0;
 
+            List<Material> MaterialList = new List<Material>();
+
+            MaterialList = Mat_Manager.Material_List;
+
             // Need to iterate through Boundary_Nodes, to find nearest material to boundary nodes
             foreach (Node b_Node in BoundaryNodes)
             {
@@ -133,11 +155,13 @@ namespace _2D_Patankar_Model
                 {
                     s_boundary_Counter++;
                 }
+
+                b_Node.Initialize_Effective_Conductivities(MaterialList);
             }
 
             Node_I_ErrorHandler.Post_Error("NOTE: " + boundary_Counter.ToString() + " number of material boundaries detected with " + s_boundary_Counter.ToString() +
                 " boundary materials matching their own material");
-
+                      
             
             Node_I_ErrorHandler.Post_Error("NOTE:  Finished Initializing Influence Coefficients");
         }
@@ -252,9 +276,7 @@ namespace _2D_Patankar_Model
             Node_I_ErrorHandler.UpdateProgress_Text("Correcting Boundary Nodes");
 
             int percent_Progress = 0;
-            int x_Pos_Matches = 0;
-            int y_Pos_Matches = 0;
-
+            
             // Still need to correct for nodes at x=xmin and y=ymax
             foreach (Node node in BoundaryNodes)
             {
@@ -266,6 +288,8 @@ namespace _2D_Patankar_Model
                     if (LayerList[node.Layer_ID].Layer_x0 > 0)
                     {
                         node.delta_x_W = FindClosestBoundary_X(node, Positions_X);
+                        node.Boundary_Material = get_Boundary_Material_X(node, "W");
+                        node.Boundary_Flag = "W";
                         nodes_Adjusted++;
                     }
                 }
@@ -276,6 +300,8 @@ namespace _2D_Patankar_Model
                     if (LayerList[node.Layer_ID].Layer_xf < max_X)
                     {
                         node.delta_x_E = FindClosestBoundary_X(node, Positions_X);
+                        node.Boundary_Material = get_Boundary_Material_X(node, "E");
+                        node.Boundary_Flag = "E";
                         nodes_Adjusted++;
                     }
                 }
@@ -286,6 +312,8 @@ namespace _2D_Patankar_Model
                     if (LayerList[node.Layer_ID].Layer_y0 < max_Y)
                     {
                         node.delta_y_N = FindClosestBoundary_Y(node, Positions_Y);
+                        node.Boundary_Material = get_Boundary_Material_Y(node, "N");
+                        node.Boundary_Flag = "N";
                         nodes_Adjusted++;
                     }
                 }
@@ -296,6 +324,8 @@ namespace _2D_Patankar_Model
                     if (LayerList[node.Layer_ID].Layer_yf > 0)
                     {
                         node.delta_y_S = FindClosestBoundary_Y(node, Positions_Y);
+                        node.Boundary_Material = get_Boundary_Material_Y(node, "S");
+                        node.Boundary_Flag = "S";
                         nodes_Adjusted++;
                     }
                 }
@@ -310,6 +340,89 @@ namespace _2D_Patankar_Model
             Node_I_ErrorHandler.Post_Error("NOTE:  Total Boundary nodes:  " + BoundaryNodes.Count.ToString());
 
             Node_I_ErrorHandler.Post_Error("NOTE:  Nodes Adjusted (minus nodes at Domain edges):  " + nodes_Adjusted.ToString());
+        }
+
+        /// <summary>
+        /// Finds the closest boundary material for a given boundary node in the x direction (E or W)
+        /// </summary>
+        /// <param name="node">Node with which to assign the boundary material to</param>
+        /// <param name="E_Or_W">Flag value indicating whether to look in the East or West direction</param>
+        /// <returns>String value containing the name of the boundary material</returns>
+        private string get_Boundary_Material_X(Node node, string E_Or_W)
+        {
+            float dx = 0.00000015f; // [m]
+            float x0 = 0.0f;
+            string material = LayerList[node.Layer_ID].Layer_Material;
+
+            x0 = node.x_pos;
+
+            if (E_Or_W == "E") // plus
+            {
+                while (material == LayerList[node.Layer_ID].Layer_Material)
+                {
+                    x0 += dx;
+                    if (x0 >= max_X)
+                        break;
+                    material = checkRectangle(x0, node.y_pos);
+                }
+            }
+
+            if (E_Or_W == "W") // minus
+            {
+                while (material == LayerList[node.Layer_ID].Layer_Material)
+                {
+                    x0 -= dx;
+
+                    if (x0 <= 0.0000000f)
+                        break;
+                    material = checkRectangle(x0, node.y_pos);
+                }
+            }
+
+            return material;
+        }
+
+        /// <summary>
+        /// Finds the closest boundary material for a given boundary node in the y direction (N or S)
+        /// </summary>
+        /// <param name="node">Node with which to assign the boundary material to</param>
+        /// <param name="N_Or_S">Flag value indicating whether to look in the North or South direction</param>
+        /// <returns>String value containing the name of the boundary material</returns>
+        private string get_Boundary_Material_Y(Node node, string N_Or_S)
+        {
+            float dy = 0.00000015f;
+            float y0 = 0.0f;
+            string material = LayerList[node.Layer_ID].Layer_Material;
+
+            y0 = node.y_pos;
+
+            if (N_Or_S == "N") // plus
+            {
+                while (material == LayerList[node.Layer_ID].Layer_Material)
+                {
+                    y0 += dy;
+
+                    if (y0 > max_Y)
+                        break;
+
+                    material = checkRectangle(node.x_pos, y0);
+                }
+            }
+
+            if (N_Or_S == "S") // minus
+            {
+                while (material == LayerList[node.Layer_ID].Layer_Material)
+                {
+                    y0 -= dy;
+
+                    if (y0 < 0.0000000f)
+                        break;
+                    material = checkRectangle(node.x_pos, y0);
+                }
+            }
+
+            return material;
+
         }
 
         /// <summary>
@@ -387,25 +500,28 @@ namespace _2D_Patankar_Model
             return delta_Y;
         }
 
+        /// <summary>
+        /// Checks each material rectangle to see which layer the XPOS and YPOS fits into
+        /// </summary>
+        /// <param name="xPOS">X-coordinate to check</param>
+        /// <param name="yPOS">Y-coordinate to check</param>
+        /// <returns>Material of the layer in which (xPOS, yPOS) resides</returns>
         public string checkRectangle(float xPOS, float yPOS)
         {
             string sMat = "";
 
+            
             foreach (Layer layer in LayerList)
             {
-                if (layer.Layer_x0 <= xPOS && layer.Layer_y0 >= yPOS)
+                if (xPOS > layer.Layer_Rectangle.x_0 & yPOS < layer.Layer_Rectangle.y_0)
                 {
-                    if (layer.Layer_xf >= xPOS && layer.Layer_yf <= yPOS)
+                    if (xPOS < layer.Layer_Rectangle.x_f & yPOS > layer.Layer_Rectangle.y_f)
                     {
                         sMat = layer.Layer_Material;
+                        break;
                     }
 
                 }
-            }
-
-            if (sMat == "")
-            {
-                Node_I_ErrorHandler.Post_Error("NODE INITIALIZATION ERROR:  No material match found");
             }
 
             return sMat;

@@ -39,6 +39,8 @@ namespace _2D_Patankar_Model
         /// </summary>
         public string Material;
 
+        public string Boundary_Flag;
+
         // Default constructor of Node object 
         // 
         // Requires passing in of the local error handler so messages can be passed into the main UI, in addition
@@ -62,6 +64,8 @@ namespace _2D_Patankar_Model
             Node_ID = p_Node_ID;
 
             Layer_ID = p_Layer_ID;
+
+            Boundary_Flag = "";
 
         }
 
@@ -332,6 +336,8 @@ namespace _2D_Patankar_Model
             }
         }
 
+        private float _an, _as, _aw, _ae, _ap;
+
         /// <summary>
         /// Index in the x direction for this particular node
         /// </summary>
@@ -345,27 +351,117 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Influence coefficient of the node EAST of this node
         /// </summary>
-        public float AE { get; set; }
+        public float AE
+        {
+            get
+            {
+                return _ae;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    _ae = value;
+                }
+                else
+                {
+                    _ae = 0.0f;
+                    NodeErrors.Post_Error("NODE ERROR:  AE attempted to set less than zero.");
+                }
+            }
+        }
 
         /// <summary>
         /// Influence coefficient of this node
         /// </summary>
-        public float AP { get; set; }
+        public float AP
+        {
+            get
+            {
+                return _ap;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    _ap = value;
+                }
+                else
+                {
+                    _ap = 0.0f;
+                    NodeErrors.Post_Error("NODE ERROR:  AP attempted to set less than zero.");
+                }
+            }
+        }
 
         /// <summary>
         /// Influence coefficient of the node to the NORTH of this node
         /// </summary>
-        public float AN { get; set; }
+        public float AN
+        {
+            get
+            {
+                return _an;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    _an = value;
+                }
+                else
+                {
+                    _an = 0.0f;
+                    NodeErrors.Post_Error("NODE ERROR:  AN attempted to set less than zero.");
+                }
+            }
+        }
 
         /// <summary>
         /// Influence coefficient of the node to the SOUTH of this node
         /// </summary>
-        public float AS { get; set; }
+        public float AS
+        {
+            get
+            {
+                return _as;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    _as = value;
+                }
+                else
+                {
+                    _as = 0.0f;
+                    NodeErrors.Post_Error("NODE ERROR:  AS attempted to set less than zero.");
+                }
+            }
+        }
 
         /// <summary>
         /// Influence coefficient of the node to the WEST of this node
         /// </summary>
-        public float AW { get; set; }
+        public float AW
+        {
+            get
+            {
+                return _aw;
+            }
+            set
+            {
+                if (value >= 0)
+                {
+                    _aw = value;
+                }
+                else
+                {
+                    _aw = 0.0f;
+                    NodeErrors.Post_Error("NODE ERROR:  AW attempted to set less than zero.");
+                }
+            }
+        }
 
         /// <summary>
         /// Phi (Temperature) for this node.  Currently duplicated via T [NEED TO FIX]
@@ -411,6 +507,47 @@ namespace _2D_Patankar_Model
             this.AS = (this.gamma * this.DX) / (this.delta_y_S);
 
             this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY);
+        }
+
+        public void Initialize_Effective_Conductivities(List<Material> MaterialList)
+        {
+            float Gamma_Temp = 0.0f;
+
+            if (Boundary_Material != "")
+            {
+                foreach (Material mat in MaterialList)
+                {
+                    if (Boundary_Material == mat.Mat_Name)
+                    {
+                        Gamma_Temp = mat.k;
+                    }
+                }
+
+            }
+
+            float harmonic_mean = (2 * (this.gamma * Gamma_Temp)) / (this.gamma + Gamma_Temp);
+
+            switch (Boundary_Flag)
+            {
+                case "E":
+                    this.AE = (harmonic_mean * this.DY) / (this.delta_x_E);
+                    break;
+                case "N":
+                    this.AN = (harmonic_mean * this.DX) / (this.delta_y_N);
+                    break;
+                case "S":
+                    this.AS = (harmonic_mean * this.DX) / (this.delta_y_S);
+                    break;
+                case "W":
+                    this.AW = (harmonic_mean * this.DY) / (this.delta_x_W);
+                    break;
+                case "":
+                    // Do nothing
+                    break;
+                default:
+                    NodeErrors.Post_Error("NODE ERROR:  No match for boundary flag for Node " + this.Node_ID.ToString());
+                    break;
+            }
         }
     }
 }
