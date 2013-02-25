@@ -493,6 +493,11 @@ namespace _2D_Patankar_Model
         /// </summary>
         public float d { get; set; }
 
+        public float AP0 { get; set; }
+
+        public float rho { get; set; }
+
+        public float cp { get; set; }
 
         public void Initialize_Influence_Coefficients()
         {
@@ -508,6 +513,8 @@ namespace _2D_Patankar_Model
 
             this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY);
         }
+
+
 
         public void Initialize_Effective_Conductivities(List<Material> MaterialList)
         {

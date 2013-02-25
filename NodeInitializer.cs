@@ -176,6 +176,8 @@ namespace _2D_Patankar_Model
                 foreach (Node ind_node in node)
                 {
                     ind_node.gamma = Mat_Manager.Get_Gamma(ind_node.Material);
+                    ind_node.rho = Mat_Manager.Get_Rho(ind_node.Material);
+                    ind_node.cp = Mat_Manager.Get_CP(ind_node.Material);
                 }
             }
 

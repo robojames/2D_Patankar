@@ -142,10 +142,50 @@ namespace _2D_Patankar_Model
 
             if (Gamma == -10.0f)
             {
-                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR:  No match found for material " + material);
+                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR [GAMMA]:  No match found for material " + material);
             }
 
             return Gamma;
+        }
+
+        public float Get_Rho(string material)
+        {
+            float Rho = -10.0f;
+
+            for (int i = 0; i < Material_List.Count; i++)
+            {
+                if (Material_List[i].Mat_Name == material)
+                {
+                    Rho = Material_List[i].rho;
+                }
+            }
+
+            if (Rho == -10.0f)
+            {
+                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR [RHO]:  No match found for material " + material);
+            }
+
+            return Rho;
+        }
+
+        public float Get_CP(string material)
+        {
+            float CP = -10.0f;
+
+            for (int i = 0; i < Material_List.Count; i++)
+            {
+                if (Material_List[i].Mat_Name == material)
+                {
+                    CP = Material_List[i].cp;
+                }
+            }
+
+            if (CP == -10.0f)
+            {
+                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR [CP]:  No match found for material " + material);
+            }
+
+            return CP;
         }
 
         // Create_Materials()

@@ -28,6 +28,8 @@ namespace _2D_Patankar_Model
             Mesh myMesh = new Mesh(myError, myGeometry.Layer_List);
 
             NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager, myGeometry.Layer_List);
+
+            BoundaryConditions myBC = new BoundaryConditions(myMesh.NodeArray, myError, 255.0f, 25.0f);
         }
 
         private void Main_Load(object sender, EventArgs e)
