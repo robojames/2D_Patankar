@@ -148,6 +148,26 @@ namespace _2D_Patankar_Model
             return Gamma;
         }
 
+        public float Get_Alpha(string material)
+        {
+            float Alpha = -10.0f;
+
+            for (int i = 0; i < Material_List.Count; i++)
+            {
+                if (Material_List[i].Mat_Name == material)
+                {
+                    Alpha = Material_List[i].alpha;
+                }
+            }
+         
+            if (Alpha == -10.0f)
+            {
+                MaterialManager_Errors.Post_Error("MATERIAL MANAGER ERROR [ALPHA]:  No math found for material " + material);
+            }
+
+            return Alpha;
+        }
+
         public float Get_Rho(string material)
         {
             float Rho = -10.0f;

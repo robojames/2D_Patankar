@@ -27,9 +27,9 @@ namespace _2D_Patankar_Model
 
             Mesh myMesh = new Mesh(myError, myGeometry.Layer_List);
 
-            NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager, myGeometry.Layer_List);
+            NodeInitializer myInitializer = new NodeInitializer(myMesh.NodeArray, myError, myManager, myGeometry.Layer_List, 0.5f, 5.0f, false);
 
-            BoundaryConditions myBC = new BoundaryConditions(myMesh.NodeArray, myError, 255.0f, 25.0f);
+            BoundaryConditions myBC = new BoundaryConditions(myMesh.NodeArray, myError, 255.0f, 25.0f, 277.0f);
         }
 
         private void Main_Load(object sender, EventArgs e)
@@ -59,8 +59,5 @@ namespace _2D_Patankar_Model
             textBox1.SelectionStart = textBox1.Text.Length;
             textBox1.ScrollToCaret();
         }
-
-       
-       
     }
 }

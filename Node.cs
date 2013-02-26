@@ -469,6 +469,11 @@ namespace _2D_Patankar_Model
         public float phi { get; set; }
 
         /// <summary>
+        /// Phi (Temperature) for this node for the previous time step.
+        /// </summary>
+        public float phi_past { get; set; }
+
+        /// <summary>
         /// Solution value, P
         /// </summary>
         public float P { get; set; }
@@ -499,7 +504,9 @@ namespace _2D_Patankar_Model
 
         public float cp { get; set; }
 
-        public void Initialize_Influence_Coefficients()
+        public float alpha { get; set; }
+
+        public void Initialize_Influence_Coefficients(float dt)
         {
             // Should only be called after the delta_x_'s have been
             // corrected to allow for boundary nodes changes.  In addition,
@@ -510,8 +517,10 @@ namespace _2D_Patankar_Model
 
             this.AN = (this.gamma * this.DX) / (this.delta_y_N);
             this.AS = (this.gamma * this.DX) / (this.delta_y_S);
+            this.AP0 = (this.rho * this.cp * this.delta_X * this.delta_Y) / dt;
 
-            this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY);
+            this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY) + this.AP0;
+            this.d = (this.sc * this.delta_X * this.delta_Y) + (this.AP0 * this.phi_past);
         }
 
 
@@ -555,6 +564,9 @@ namespace _2D_Patankar_Model
                     NodeErrors.Post_Error("NODE ERROR:  No match for boundary flag for Node " + this.Node_ID.ToString());
                     break;
             }
+
+            // After calculation of the effective conductivity, AP needs to be recalculated:
+            this.AP = this.AE + this.AW + this.AN + this.AS - (this.sp * this.DX * this.DY);
         }
     }
 }

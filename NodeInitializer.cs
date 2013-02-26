@@ -54,6 +54,21 @@ namespace _2D_Patankar_Model
         /// </summary>
         float y_Max_DY;
 
+        /// <summary>
+        /// Difference between each time step
+        /// </summary>
+        float dt;
+
+        /// <summary>
+        /// Current flowing through the TEM
+        /// </summary>
+        float Amps;
+
+        /// <summary>
+        /// Bool value:  TRUE -> Top of TEM is hot, FALSE -> Bottom of TEM is hot
+        /// </summary>
+        bool is_Warming_Top;
+
 
         /// <summary>
         /// Material manager object which holds current materials being utilized in the numeric study
@@ -67,8 +82,14 @@ namespace _2D_Patankar_Model
         /// <param name="local_ErrorHandler">Error Handler for Message Passing</param>
         /// <param name="Materials">Material Manager which holds all the material properties</param>
         /// <param name="Layers">List of Layers holding material information for each node inside of it</param>
-        public NodeInitializer(Node[][] Nodes, ErrorHandler local_ErrorHandler, MaterialManager Materials, List<Layer> Layers)
+        public NodeInitializer(Node[][] Nodes, ErrorHandler local_ErrorHandler, MaterialManager Materials, List<Layer> Layers, float dt, float Amps, bool is_Warming_Top)
         {
+            this.dt = dt;
+
+            this.Amps = Amps;
+
+            this.is_Warming_Top = is_Warming_Top;
+
             x_Max_DX = 0.0f;
             y_Max_DY = 0.0f;
 
@@ -112,7 +133,52 @@ namespace _2D_Patankar_Model
 
             Calculate_DxDy();
 
-            Initialize_Influence_Coefficients(Nodes);
+            Initialize_Heat_Generation(Amps, is_Warming_Top); // Passed in 5.0f value represents an initialization current... this needs to be fed in
+
+            Initialize_Influence_Coefficients(Nodes); // Must come after heat generation initialization
+        }
+
+        /// <summary>
+        /// Initializes the heat generation for the BiTE pieces of the TEM based on using one array of
+        /// nodes on either side of the BiTe pieces
+        /// </summary>
+        /// <param name="Amps">Current in Amps which passes through the TEM</param>
+        /// <param name="is_Warming_Top">Bool value:  If TRUE, the upper surface warms, if FALSE the bottom surface warms</param>
+        private void Initialize_Heat_Generation(float Amps, bool is_Warming_Top)
+        {
+            int flag = 0;
+
+            if (is_Warming_Top)
+            {
+                flag = 1;
+            }
+            else
+            {
+                flag = -1;
+            }
+
+            foreach (Node[] NodalArray in NodeArray)
+            {
+                foreach (Node node in NodalArray)
+                {
+                    if (node.Material == "BiTe" && LayerList[node.Layer_ID].adjusted_Y0 == node.y_pos)
+                    {
+                        node.sp = (float)flag * 2.0f * node.alpha * Amps; // 222222 NEEDS TO BE REPLACED BY SEEBECK COEFFICIENT
+                    }
+
+                    if (node.Material == "BiTe" && LayerList[node.Layer_ID].adjusted_YF == node.y_pos)
+                    {
+                        node.sp = (float)flag * 2.0f * node.alpha * Amps; // 222222 NEEDS TO BE REPLACED BY SEEBECK COEFFICIENT
+                    }
+
+                    if (node.Material == "BiTe")
+                    {
+                        node.sc = Amps * Amps; // TIMES electrical resistance, need electrical resistivity
+                    }
+                }
+            }
+
+            Node_I_ErrorHandler.Post_Error("NOTE:  Sp and Sc set for all BiTe Nodes");
         }
 
         /// <summary>
@@ -127,7 +193,7 @@ namespace _2D_Patankar_Model
             {
                 foreach (Node node in Node_Array)
                 {
-                    node.Initialize_Influence_Coefficients();
+                    node.Initialize_Influence_Coefficients(dt);
 
                     if (node.is_Boundary)
                     {
@@ -178,6 +244,7 @@ namespace _2D_Patankar_Model
                     ind_node.gamma = Mat_Manager.Get_Gamma(ind_node.Material);
                     ind_node.rho = Mat_Manager.Get_Rho(ind_node.Material);
                     ind_node.cp = Mat_Manager.Get_CP(ind_node.Material);
+                    ind_node.alpha = Mat_Manager.Get_Alpha(ind_node.Material);
                 }
             }
 
