@@ -8,7 +8,7 @@ namespace _2D_Patankar_Model
 {
     class Solver
     {
-        public void Solve_2D(Node[,] Nodes, float sol_Tol)
+        public void Solve_2D(Node[][] Nodes, float sol_Tol)
         {
             int n_iter = 0;
 

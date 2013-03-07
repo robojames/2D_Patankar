@@ -175,7 +175,13 @@ namespace _2D_Patankar_Model
                     {
                         node.sc = Amps * Amps; // TIMES electrical resistance, need electrical resistivity
                     }
+
+                    if (node.Material == "Copper")
+                    {
+                        node.sc = Amps * Amps; // TIMES Electrical resistance, need electrical resistivity
+                    }
                 }
+
             }
 
             Node_I_ErrorHandler.Post_Error("NOTE:  Sp and Sc set for all BiTe Nodes");
