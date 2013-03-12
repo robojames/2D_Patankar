@@ -9,6 +9,9 @@ namespace _2D_Patankar_Model
 {
     class BoundaryConditions
     {
+        // Need to edit to include passed invalues for potential changes in the boundary conditions for the User Interface
+
+
         /// <summary>
         /// Node array containing the entire mesh
         /// </summary>

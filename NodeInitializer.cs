@@ -260,7 +260,7 @@ namespace _2D_Patankar_Model
             {
                 foreach (Node ind_node in node)
                 {
-                    if (ind_node.gamma == 0)
+                    if (ind_node.gamma == 0.0f | ind_node.rho == 0.0f | ind_node.cp == 0.0f)
                     {
                         Node_I_ErrorHandler.Post_Error("Node Initialization Error:  Gamma set to 0 for Node " + ind_node.Node_ID.ToString());
                     }
@@ -352,7 +352,6 @@ namespace _2D_Patankar_Model
 
             int percent_Progress = 0;
             
-            // Still need to correct for nodes at x=xmin and y=ymax
             foreach (Node node in BoundaryNodes)
             {
                 Node_I_ErrorHandler.UpdateProgress((int)(100 * ((float)(percent_Progress) / (float)(BoundaryNodes.Count))));
@@ -492,6 +491,7 @@ namespace _2D_Patankar_Model
 
                     if (y0 < 0.0000000f)
                         break;
+
                     material = checkRectangle(node.x_pos, y0);
                 }
             }

@@ -342,7 +342,7 @@ namespace _2D_Patankar_Model
         }
         
         /// <summary>
-        /// Calculates node spacing
+        /// Calculates node spacing, this should be the same as y_spacing correct?
         /// </summary>
         /// <returns>Returns distance [m] for each node</returns>
         private float Calc_NodeSpacing()
