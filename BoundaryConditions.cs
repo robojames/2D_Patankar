@@ -19,11 +19,41 @@ namespace _2D_Patankar_Model
         /// </summary>
         ErrorHandler BC_ErrorHandler;
 
-        private float T_Base;
+        /// <summary>
+        /// Bool array indicating which surfaces have a boundary condition of constant convection.
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private bool[] BC_h;
 
-        private float h_Top;
+        /// <summary>
+        /// Bool array indicating which surfaces have a constant temperature boundary condition.
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private bool[] BC_T;
 
-        private float T_inf;
+        /// <summary>
+        /// Bool array indicative of which surfaces have an insulated (adiabatic) boundary condition
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private bool[] BC_Adiabatic;
+
+        /// <summary>
+        /// Array of convective coefficients acting on a surface
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private float[] h_Coefficient;
+
+        /// <summary>
+        /// Array of constant bulk fluid temperature for a constant convection boundary condition
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private float[] T_inf;
+
+        /// <summary>
+        /// Array of constant temperature boundary conditions
+        /// [TOP LEFT BOTTOM RIGHT]
+        /// </summary>
+        private float[] Constant_T;
 
         /// <summary>
         /// Constructor for BoundaryConditions class
@@ -33,17 +63,52 @@ namespace _2D_Patankar_Model
         /// <param name="T_Base">Constant temperature of the south face of the TEM in Kelvin</param>
         /// <param name="h_Top">Heat transfer coefficient (initial) operating off of the top surface of the TEM</param>
         /// <param name="T_inf">Ambient temperature utilized for the convective coefficient off of the top surface</param>
-        public BoundaryConditions(Node[][] Nodal_Array, ErrorHandler local_ErrorHandler, float T_Base, float h_Top, float T_inf)
+        public BoundaryConditions(Node[][] Nodal_Array, ErrorHandler local_ErrorHandler, bool[] BC_CONVECTION, bool[] BC_CONST_T, bool[] BC_ADIABATIC, float[] h, float[] T_INFINITY, float[] T_CONST)
         {
             Nodes = Nodal_Array;
 
             BC_ErrorHandler = local_ErrorHandler;
 
-            Apply_Boundary_Conditions();
+            BC_h = BC_CONVECTION;
+            
+            BC_T = BC_CONST_T;
+            
+            BC_Adiabatic = BC_ADIABATIC;
 
-            this.T_Base = T_Base;
-            this.h_Top = h_Top;
-            this.T_inf = T_inf;
+            h_Coefficient = h;
+            
+            Constant_T = T_CONST;
+
+            T_inf = T_INFINITY;
+
+            Check_Boundary_Condition();
+
+            Apply_Boundary_Conditions();
+            
+        }
+
+        public void Check_Boundary_Condition()
+        {
+            for (int i = 0; i < BC_h.Count(); i++)
+            {
+                // If a boundary i has been selected, AND if h has not been defined or T_infinity has not been defined
+                // then throw an error
+                if (BC_h[i] == true)
+                {
+                    if (h_Coefficient[i] == 0.0f | T_inf[i] == 0.0f)
+                    {
+                        BC_ErrorHandler.Post_Error("BOUNDARY CONDITION ERROR:  Boundary condition has been defined (h, Tinf) but not set.");
+                    }
+                }
+
+                // If a constant temperature boundary has been set, but not the temperature then throw an error
+                if (BC_T[i] == true && Constant_T[i] == 0.0f)
+                {
+                    BC_ErrorHandler.Post_Error("BOUNDARY CONDITION ERROR:  Boundary condition has been defined (const T), but not set.");
+                }
+            }
+
+
         }
 
         public void Apply_Boundary_Conditions()
@@ -52,8 +117,9 @@ namespace _2D_Patankar_Model
 
             BC_ErrorHandler.UpdateProgress_Text("Applying Boundary Conditions...");
 
-            BC_ErrorHandler.Post_Error("NOTE:  Harmonic means need to be checked and their order of precedence, as well as dt needs to be added in ");
-            // Sets the constant temperature boundary condition on the South Face of the TEM
+            //
+            // Sets the constant temperature boundary condition on the South Face [Index 2]
+            //
             for (int i = 0; i < Nodes.Count(); i++)
             {
                 Nodes[i][0].AS = 0.0f;
@@ -61,12 +127,14 @@ namespace _2D_Patankar_Model
                 Nodes[i][0].AN = 0.0f;
                 Nodes[i][0].AE = 0.0f;
                 Nodes[i][0].AP0 = Nodes[i][0].cp * Nodes[i][0].rho * Nodes[i][0].delta_X * Nodes[i][0].delta_Y; // NEEDS to be divided by delta T
-                Nodes[i][0].d = T_Base + Nodes[i][0].sc * Nodes[i][0].delta_X * Nodes[i][0].delta_Y * 0.5f * T_Base;
+                Nodes[i][0].d = Constant_T[2] + Nodes[i][0].sc * Nodes[i][0].delta_X * Nodes[i][0].delta_Y * 0.5f * Constant_T[2];
                 Nodes[i][0].AP = Nodes[i][0].AE + Nodes[i][0].AW + Nodes[i][0].AN + Nodes[i][0].AS + 1;
-                Nodes[i][0].phi = T_Base;
+                Nodes[i][0].phi = Constant_T[2];
             }
 
-            // Sets the convective boundary condition on the north face of the TEM (initially) -- later to be applied only to the bridge
+            //
+            // Sets the convective boundary temperature condition on the North Face [Index 0]
+            //
             for (int i = 0; i < Nodes.Count(); i++)
             {
                 int y_Max = Nodes[i].Count() - 1;
@@ -77,11 +145,13 @@ namespace _2D_Patankar_Model
                 Nodes[i][y_Max].AE = 0.0f;
                 Nodes[i][y_Max].AP0 = Nodes[i][y_Max].cp * Nodes[i][y_Max].rho * Nodes[i][y_Max].delta_X * Nodes[i][y_Max].delta_Y; // NEEDS to be divided by delta-T
                 Nodes[i][y_Max].phi = 0.0f;
-                Nodes[i][y_Max].d = h_Top * Nodes[i][y_Max].delta_Y * T_inf;
-                Nodes[i][y_Max].AP = Nodes[i][y_Max].AE + Nodes[i][y_Max].AW + Nodes[i][y_Max].AN + Nodes[i][y_Max].AS + h_Top * Nodes[i][y_Max].delta_Y;
+                Nodes[i][y_Max].d = h_Coefficient[0] * Nodes[i][y_Max].delta_Y * T_inf[0];
+                Nodes[i][y_Max].AP = Nodes[i][y_Max].AE + Nodes[i][y_Max].AW + Nodes[i][y_Max].AN + Nodes[i][y_Max].AS + h_Coefficient[0] * Nodes[i][y_Max].delta_Y;
             }
 
-            // Sets the adiabatic (q = 0) boundary condition on the West Face of the TEM
+            //
+            // Sets the adiabatic (q = 0) boundary condition on the West Face of the TEM [Index 1]
+            //
             for (int j = 0; j < Nodes[0].Count(); j++)
             {
                 int x_Min = Nodes[0].Count() - 1;
@@ -97,7 +167,9 @@ namespace _2D_Patankar_Model
                 Nodes[0][j].phi = 0.0f;              
             }
 
-            // Sets the adiabatic (q=0) boundary condition on the East Face of the TEM
+            //
+            // Sets the adiabatic (q=0) boundary condition on the East Face of the TEM [Index 3]
+            //
             for (int j = 0; j < Nodes[Nodes.Count() - 1].Count(); j++)
             {
                 int x_Max = Nodes.Count() - 1;
@@ -117,6 +189,8 @@ namespace _2D_Patankar_Model
 
             BC_ErrorHandler.UpdateProgress(0);
             BC_ErrorHandler.UpdateProgress_Text("");
+
+            BC_ErrorHandler.Post_Error("Finished applying boundary conditions");
         }
     }
 }

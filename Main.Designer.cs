@@ -49,12 +49,12 @@
             // 
             this.textBox1.AcceptsReturn = true;
             this.textBox1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.textBox1.Location = new System.Drawing.Point(266, 0);
+            this.textBox1.Location = new System.Drawing.Point(292, 0);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(497, 319);
+            this.textBox1.Size = new System.Drawing.Size(497, 326);
             this.textBox1.TabIndex = 1;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -63,7 +63,7 @@
             this.CheckBoxDebug.AutoSize = true;
             this.CheckBoxDebug.Checked = true;
             this.CheckBoxDebug.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBoxDebug.Location = new System.Drawing.Point(172, 12);
+            this.CheckBoxDebug.Location = new System.Drawing.Point(172, 209);
             this.CheckBoxDebug.Name = "CheckBoxDebug";
             this.CheckBoxDebug.Size = new System.Drawing.Size(88, 17);
             this.CheckBoxDebug.TabIndex = 2;
@@ -90,7 +90,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(763, 319);
+            this.ClientSize = new System.Drawing.Size(789, 326);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.CheckBoxDebug);
@@ -103,6 +103,8 @@
             this.PerformLayout();
 
         }
+
+       
 
         #endregion
 
