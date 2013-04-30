@@ -261,7 +261,7 @@ namespace _2D_Patankar_Model
             float Y0 = this.Layer_Rectangle.y_0 - this.layer_dy;
             float YF = this.Layer_Rectangle.y_f + this.layer_dy;
 
-            float dy = YF + ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
+            float dy = Y0 - ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
 
             if (dy <= 0)
                 Layer_Errors.Post_Error("Layer Error:  Y position for a node set <= 0");

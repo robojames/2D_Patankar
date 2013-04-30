@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="BoundaryConditions.cs" />
     <Compile Include="BridgeGeometry.cs" />
+    <Compile Include="CSVWriter.cs" />
     <Compile Include="ErrorHandler.cs">
       <SubType>Form</SubType>
     </Compile>

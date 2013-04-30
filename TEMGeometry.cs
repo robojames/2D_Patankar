@@ -161,9 +161,9 @@ namespace _2D_Patankar_Model
             // Create thin copper connector (bottom, first and last)
             //
             // First
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[1], y_0[1], x_f[1], y_f[1], "Copper", n_Nodes_CE));
+            //Layer_List.Add(new Layer(Geometry_Errors, x_0[1], y_0[1], x_f[1], y_f[1], "Copper", n_Nodes_CE));
             // Last
-            Layer_List.Add(new Layer(Geometry_Errors, (x_0[1] + ((n_elements - 1) * (BiTE_AirGap + BiTE_Thickness))), y_0[1], 0.0389636f, y_0[1] - CE_Thickness, "Copper", n_Nodes_CE)); 
+            //Layer_List.Add(new Layer(Geometry_Errors, (x_0[1] + ((n_elements - 1) * (BiTE_AirGap + BiTE_Thickness))), y_0[1], 0.0389636f, y_0[1] - CE_Thickness, "Copper", n_Nodes_CE)); 
 
             // Create all BiTE elements
             for (int k = 0; k < n_elements; k++)
@@ -178,7 +178,7 @@ namespace _2D_Patankar_Model
 
             Geometry_Errors.UpdateProgress(20);
 
-            // Create Bottom Copper Elements (excluding first and last)
+            //Create Bottom Copper Elements (excluding first and last)
             for (int j = 0; j < ((n_elements) / 2) - 1; j++)
             {
                 float x_0_CE = 0.003175f + (j * (BiTE_AirGap + CE_Width));
@@ -200,6 +200,8 @@ namespace _2D_Patankar_Model
 
                 float x_f_CE = x_0_CE + CE_Width;
                 float y_f_CE = y_0_CE - CE_Thickness;
+
+                Layer_List.Add(new Layer(Geometry_Errors, x_0_CE, y_0_CE, x_f_CE, y_f_CE, "Copper", n_Nodes_CE));
             }
             Geometry_Errors.UpdateProgress(60);
 

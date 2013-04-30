@@ -11,6 +11,18 @@ namespace _2D_Patankar_Model
     //
     class Node
     {
+
+        /// <summary>
+        /// References the positive coordinate neighbor node (for node P on the western face of a layer this would correspond to the northern neighbor)
+        /// </summary>
+        Node neighbor_1;
+
+        /// <summary>
+        /// References the negative coordinate neighbor node (for node P on the western face of a layer this would correspond to the southern neighbor)
+        /// </summary>
+        Node neighbor_2;
+
+
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
         /// <summary>
         /// Passes error messages to the Main UI

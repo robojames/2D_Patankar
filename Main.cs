@@ -73,9 +73,11 @@ namespace _2D_Patankar_Model
 
             BoundaryConditions myBC = new BoundaryConditions(myMesh.NodeArray, myError, BC_CONVECTION, BC_CONST_T, BC_ADIABATIC, h_Coefficient, T_infinity, T_Constant);
 
-            Solver mySolver = new Solver(myError, myMesh.NodeArray);
+            CSVWriter myCSV = new CSVWriter(myMesh.NodeArray);
 
-            mySolver.Solve_2D(0.005f);
+            //Solver mySolver = new Solver(myError, myMesh.NodeArray);
+
+            //mySolver.Solve_2D(0.005f);
         }
 
         private void Main_Load(object sender, EventArgs e)
