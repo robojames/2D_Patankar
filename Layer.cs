@@ -236,7 +236,7 @@ namespace _2D_Patankar_Model
         /// <returns>Node Positioning in the x-direction [m]</returns>
         public float X(float i)
         {
-            this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (float)Nodes;
+            this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (4.0f * (float)Nodes);
 
             float X0 = this.Layer_Rectangle.x_0 + this.layer_dx;
             float XF = this.Layer_Rectangle.x_f - this.layer_dx;
@@ -257,7 +257,8 @@ namespace _2D_Patankar_Model
         /// <returns>Node positioning in the y-direction</returns>
         public float Y(float i)
         {
-            this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (float)Nodes;
+            // Eta_y in documentation
+            this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (4.0f*(float)Nodes);
 
             float Y0 = this.Layer_Rectangle.y_0 - this.layer_dy;
             float YF = this.Layer_Rectangle.y_f + this.layer_dy;

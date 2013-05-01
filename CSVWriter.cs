@@ -32,7 +32,7 @@ namespace _2D_Patankar_Model
 
                 TextWriter dataWrite = new StreamWriter(directory);
 
-                dataWrite.WriteLine("Node ID" + "," + "XPOS" + "," + "YPOS");
+                dataWrite.WriteLine("Node ID" + "," + "XPOS" + "," + "YPOS" + "," + "Material");
 
                 //for (int i = 1; i < scanCount; i++)
                   //  dataWrite.WriteLine(ampArraytoWrite[i] + "," + timeArray[i] + "," + tempArray[i] + "," + dTdt[i]);
@@ -41,7 +41,18 @@ namespace _2D_Patankar_Model
                 {
                     foreach (Node ind_node in node)
                     {
-                        dataWrite.WriteLine(ind_node.Node_ID + "," + ind_node.x_pos + "," + ind_node.y_pos);
+                        int node_Material = 0;
+
+                        if (ind_node.Material == "Copper")
+                            node_Material = 1;
+                        else if (ind_node.Material == "BiTe")
+                            node_Material = 2;
+                        else if (ind_node.Material == "Ceramic")
+                            node_Material = 3;
+                        else if (ind_node.Material == "Air")
+                            node_Material = 4;
+
+                        dataWrite.WriteLine(ind_node.Node_ID + "," + ind_node.x_pos + "," + ind_node.y_pos + "," + node_Material);
                     }
                 }
                 

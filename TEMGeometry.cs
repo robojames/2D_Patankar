@@ -76,17 +76,23 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Number of nodes for each ceramic alumina plate
         /// </summary>
-        private const int n_Nodes_Ceramic = 30;
+        private const int n_Nodes_Ceramic = 50;
 
 
         private float[] Coord_Ceramic_Base_Bottom = new float[4] { 0.0f, 0.635f, 39.9796f, 0.00f };
         private float[] Coord_Ceramic_Base_Top = new float[4] { 0.0f, 3.4150f, 39.9796f, 2.780f };
 
         private float[] Coord_Left_Air_Gap = new float[4] { 0.0f, 2.7800f, 1.016f, 0.635f };
-        private float[] Coord_Right_Air_Gap = new float[4] { 38.9636f, 2.7800f, 39.9796f, 0.635f };
+
+        // Right air gap X_0 needs to be increased I'm pretty sure
+        private float[] Coord_Right_Air_Gap = new float[4] { 39.116f, 2.77999f, 39.97960f, 0.635f };
 
         private float[] Coord_First_Bot_CU = new float[4] { 1.016f, 1.0541f, 2.4130f, 0.635f };
-        private float[] Coord_Last_Bot_CU = new float[4] { 37.5666f, 1.0541f, 38.9636f, 0.635f };
+        
+        // Re Check this value
+        //private float[] Coord_Last_Bot_CU = new float[4] { 37.5666f, 1.0541f, 39.9796f, 0.635f };
+
+        private float[] Coord_Last_Bot_CU = new float[4] { 37.719f, 1.0541f, 39.11600f, 0.635f };
 
         private float[] Coord_Cu_Bottom = new float[4] { 3.1750f, 1.0541f, 6.7310f, 0.635f };
         private float[] Coord_Cu_Top = new float[4] { 1.016f, 2.7799f, 4.5720f, 2.3749f};
