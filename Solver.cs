@@ -20,6 +20,32 @@ namespace _2D_Patankar_Model
 
         public void Solve_2D(float sol_Tol)
         {
+            //        // Traveling in positive y-direction
+            //        // A: AP
+            //        // B: AN
+            //        // C: AS
+            //        // D: d
+            //        for (int i = 1; i < x_nodes_max; i++)
+            //        {
+            //            P_Y[0] = Nodes[i, 0].AN / Nodes[i, 0].AP;
+            //            Q_Y[0] = Nodes[i, 0].d / Nodes[i, 0].AP;
+
+            //            for (int j = 1; j < y_nodes_max + 1; j++)
+            //            {
+            //                P_Y[j] = Nodes[i, j].AN / (Nodes[i, j].AP - Nodes[i, j].AS * P_Y[j - 1]);
+            //                Q_Y[j] = (Nodes[i, j].d + Nodes[i, j].AE * Nodes[i + 1, j].phi + Nodes[i, j].AW * Nodes[i - 1, j].phi + Nodes[i, j].AS * Q_Y[j - 1]) / (Nodes[i, j].AP - Nodes[i, j].AS * P_Y[j - 1]);
+            //            }
+
+            //            Nodes[i, y_nodes_max].phi = Q_Y[y_nodes_max];
+
+            //            for (int j = y_nodes_max - 1; j >= 0; --j)
+            //            {
+            //                Nodes[i, j].phi = P_Y[j] * Nodes[i, j + 1].phi + Q_Y[j];
+            //                //Debug.WriteLine("Node[" + i.ToString() + "," + j.ToString() + "] = " + Nodes[i, j].phi.ToString());   
+            //            }
+            //        }
+
+
             // Moving in the y-positive direction
             for (int i = 1; i < Nodes.Count() - 2; i++)
             {

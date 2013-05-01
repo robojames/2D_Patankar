@@ -83,6 +83,8 @@ namespace _2D_Patankar_Model
             NodeList = new List<Node>();
 
             Generate_Mesh_ByLayer(LayerList);
+
+            SetBoundaryNodes(LayerList);
         }
 
         // Main subroutine which generates the mesh, given XNODES and YNODES
@@ -277,6 +279,42 @@ namespace _2D_Patankar_Model
             if (node.x_pos < Current_Layer.Layer_x0)
                 Mesh_Errors.Post_Error("MESH ERROR:  Node assignment outside of layer bounds {x0-" + Current_Layer.Layer_x0.ToString() + ", x_node-" + node.x_pos.ToString() + "}");
 
+        }
+
+        private void SetBoundaryNodes(List<Layer> LayerList)
+        {
+            foreach (Node[] Array in NodeArray)
+            {
+                foreach (Node node in Array)
+                {
+                    if (node.is_Boundary == true)
+                    {
+                        // For the case when the node is on the left hand side
+                        if (node.x_pos == LayerList[node.Layer_ID].adjusted_X0)
+                        {
+
+                        }
+
+                        // For the case when the node is on the right hand side
+                        if (node.x_pos == LayerList[node.Layer_ID].adjusted_XF)
+                        {
+
+                        }
+
+                        // For the case when the node is on top of a given layer
+                        if (node.y_pos == LayerList[node.Layer_ID].adjusted_Y0)
+                        {
+
+                        }
+
+                        // For the case when the node is on the bottom of a given layer
+                        if (node.y_pos == LayerList[node.Layer_ID].adjusted_YF)
+                        {
+
+                        }
+                    }
+                }
+            }
         }
     }
 }

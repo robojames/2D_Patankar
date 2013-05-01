@@ -12,7 +12,7 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Maximum x-direction [m]
         /// </summary>
-        public const float x_max = 0.0401828f;
+        public const float x_max = 0.040f;
 
         /// <summary>
         /// Maximum y-direction [m]
@@ -146,6 +146,7 @@ namespace _2D_Patankar_Model
         public Layer(ErrorHandler local_ErrorHandler, float x_0, float y_0, float x_f, float y_f, string Mat_Name, int n_Nodes)
         {
             Layer_Errors = local_ErrorHandler;
+            Layer_Material = Mat_Name;
 
             Check_Positioning(x_0, y_0, x_f, y_f);
             
@@ -156,7 +157,6 @@ namespace _2D_Patankar_Model
             Layer_y0 = y_0;
             Layer_yf = y_f;
 
-            Layer_Material = Mat_Name;
 
             Layer_Area = Layer_Rectangle.Area();
 
@@ -189,13 +189,14 @@ namespace _2D_Patankar_Model
         public void Check_Positioning(float x0, float y0, float xf, float yf)
         {
             if (x0 > xf)
-                Layer_Errors.Post_Error("LAYER ERROR:  (x0 > xf)");
+                Layer_Errors.Post_Error(this.Layer_Material.ToString().ToUpper() + " LAYER ERROR:  (x0 > xf) | (" + x0.ToString() + " > " + xf.ToString() + ")");
             if (y0 < yf)
-                Layer_Errors.Post_Error("LAYER ERROR:  (y0 < yf)");
+                Layer_Errors.Post_Error(this.Layer_Material.ToString().ToUpper() + " LAYER ERROR:  (y0 < yf) | (" + y0.ToString() + " < " + yf.ToString() + ")");
             if (xf > x_max)
-                Layer_Errors.Post_Error("LAYER ERROR:  (x0 > xmax)");
+                Layer_Errors.Post_Error(this.Layer_Material.ToString().ToUpper() + " LAYER ERROR:  (xf > xmax) | (" + xf.ToString() + " > " + "X max" + ")");
             if (y0 > y_max)
-                Layer_Errors.Post_Error("LAYER ERROR:  (y0 > ymax)");
+                Layer_Errors.Post_Error(this.Layer_Material.ToString().ToUpper() + " LAYER ERROR:  (y0 > ymax) | (" + y0.ToString() + " > " + "Y max" + ")");
+            
         }
 
         // NodeCount

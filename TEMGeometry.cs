@@ -1,8 +1,9 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace _2D_Patankar_Model
 {
@@ -43,11 +44,6 @@ namespace _2D_Patankar_Model
         private const float BiTE_AirGap = 0.000762f;
 
         /// <summary>
-        /// Height of the BiTe elements [m]
-        /// </summary>
-        private const float BiTE_Height = 0.0013208f;
-
-        /// <summary>
         /// Copper connector widths [m] in the x-direction
         /// </summary>
         private const float CE_Width = 0.003556f;
@@ -65,46 +61,42 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Number of nodes for the BiTe elements
         /// </summary>
-        private const int n_Nodes_BiTe = 100;
+        private const int n_Nodes_BiTe = 30;
 
         /// <summary>
         /// Number of nodes for the air elements
         /// </summary>
-        private const int n_Nodes_Air = 150;
+        private const int n_Nodes_Air = 30;
 
         /// <summary>
         /// Number of nodes for the copper connector elements
         /// </summary>
-        private const int n_Nodes_CE = 100;
+        private const int n_Nodes_CE = 30;
 
         /// <summary>
         /// Number of nodes for each ceramic alumina plate
         /// </summary>
-        private const int n_Nodes_Ceramic = 150;
+        private const int n_Nodes_Ceramic = 30;
 
-        // Series of x0, y0, xf, and yf values (see Rectangle in Layer.cs) provided for
-        // reference, and in case the geometry changes slightly
-        /// <summary>
-        /// Refer to documentation for the specific positioning of these values and their significance.
-        /// 
-        /// DO NOT CHANGE
-        /// </summary>
-        private float[] x_0 = new float[4] { 0, 0.001016f, 0.001016f, 0.001016f};
 
-        /// <summary>
-        /// Refer to documentation for the specific positioning of these values and their significance.
-        /// </summary>
-        private float[] y_0 = new float[4] { 0.000635f, 0.0010541f, 0.0023749f, 0.00277999f};
+        private float[] Coord_Ceramic_Base_Bottom = new float[4] { 0.0f, 0.635f, 39.9796f, 0.00f };
+        private float[] Coord_Ceramic_Base_Top = new float[4] { 0.0f, 3.4150f, 39.9796f, 2.780f };
 
-        /// <summary>
-        /// Refer to documentation for the specific positioning of these values and their significance.
-        /// </summary>
-        private float[] x_f = new float[4] { 0.03997960f, 0.002413f, 0.002413f, 0.004572f};
+        private float[] Coord_Left_Air_Gap = new float[4] { 0.0f, 2.7800f, 1.016f, 0.635f };
+        private float[] Coord_Right_Air_Gap = new float[4] { 38.9636f, 2.7800f, 39.9796f, 0.635f };
 
-        /// <summary>
-        /// Refer to documentation for the specific positioning of these values and their significance.
-        /// </summary>
-        private float[] y_f = new float[4] { 0, 0.000635f, 0.0010541f, 0.00236089f};
+        private float[] Coord_First_Bot_CU = new float[4] { 1.016f, 1.0541f, 2.4130f, 0.635f };
+        private float[] Coord_Last_Bot_CU = new float[4] { 37.5666f, 1.0541f, 38.9636f, 0.635f };
+
+        private float[] Coord_Cu_Bottom = new float[4] { 3.1750f, 1.0541f, 6.7310f, 0.635f };
+        private float[] Coord_Cu_Top = new float[4] { 1.016f, 2.7799f, 4.5720f, 2.3749f};
+
+        private float[] Coord_BiTE = new float[4] { 1.016f, 2.3609f, 2.4130f, 1.0541f };
+
+        private float[] Coord_Top_AirGaps = new float[4] { 4.5720f, 2.7800f, 5.3340f,  1.0541f};
+        private float[] Coord_Bottom_AirGaps = new float[4] { 2.4130f, 2.3609f, 3.1750f, 0.635f };
+
+        List<float[]> Coord_List;
 
         // Constructor for the TEMGeometry.cs class.  Requires passing in of the local error
         // handler but nothing else.  Every other value is generated from other classes as
@@ -121,12 +113,22 @@ namespace _2D_Patankar_Model
             // Initializes a new List of Layers
             Layer_List = new List<Layer>();
 
-            // Assigns length of xf vector to n_Coords.  Assumes that all the const vector series defined above
-            // are of the same length
-            n_Coords = x_f.Length;
+            Coord_List = new List<float[]>();
 
-            // Reports the number of defined coordinates to the user to ensure proper reading
-            Geometry_Errors.Post_Error("Note: Calculated length of vectors for Geometry TEM: " + n_Coords.ToString());
+            Coord_List.Add(Coord_Ceramic_Base_Bottom);
+            Coord_List.Add(Coord_Ceramic_Base_Top);
+            Coord_List.Add(Coord_Left_Air_Gap);
+            Coord_List.Add(Coord_Right_Air_Gap);
+            Coord_List.Add(Coord_First_Bot_CU);
+            Coord_List.Add(Coord_Last_Bot_CU);
+            Coord_List.Add(Coord_Cu_Bottom);
+            Coord_List.Add(Coord_Cu_Top);
+            Coord_List.Add(Coord_BiTE);
+            Coord_List.Add(Coord_Top_AirGaps);
+            Coord_List.Add(Coord_Bottom_AirGaps);
+
+            // Function to modify dimensions (which are entered in mm) to m
+            ConvertUnits(Coord_List);
 
             // Function to generate the geometry of the TEM
             GenerateGeometry();
@@ -139,6 +141,17 @@ namespace _2D_Patankar_Model
             foreach (Layer layer in Layer_List)
             {
                 //Geometry_Errors.Post_Error("Layer ID:  " + layer.getID().ToString() + ": " + layer.Layer_Area.ToString());
+            }
+        }
+
+        private void ConvertUnits(List<float[]> CoordList)
+        {
+            foreach (float[] array in CoordList)
+            {
+                array[0] *= (float)Math.Pow(10, -3.0);
+                array[1] *= (float)Math.Pow(10, -3.0);
+                array[2] *= (float)Math.Pow(10, -3.0);
+                array[3] *= (float)Math.Pow(10, -3.0);
             }
         }
 
@@ -155,86 +168,89 @@ namespace _2D_Patankar_Model
             Geometry_Errors.UpdateProgress(0);
             Geometry_Errors.UpdateProgress_Text("Generating Geometry and Material Layers");
 
-            // Create base ceramic layer
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[0], x_f[0], y_f[0], "Ceramic", n_Nodes_Ceramic));
+            // Generates Layers for both top and bottom ceramic pieces of TEM geometry
+            Layer TEM_Bottom = new Layer(Geometry_Errors, Coord_Ceramic_Base_Bottom[0], Coord_Ceramic_Base_Bottom[1], Coord_Ceramic_Base_Bottom[2], Coord_Ceramic_Base_Bottom[3], "Ceramic", n_Nodes_Ceramic);
+            Layer TEM_Top = new Layer(Geometry_Errors, Coord_Ceramic_Base_Top[0], Coord_Ceramic_Base_Top[1], Coord_Ceramic_Base_Top[2], Coord_Ceramic_Base_Top[3], "Ceramic", n_Nodes_Ceramic);
 
-            // Create thin copper connector (bottom, first and last)
-            //
-            // First
-            //Layer_List.Add(new Layer(Geometry_Errors, x_0[1], y_0[1], x_f[1], y_f[1], "Copper", n_Nodes_CE));
-            // Last
-            //Layer_List.Add(new Layer(Geometry_Errors, (x_0[1] + ((n_elements - 1) * (BiTE_AirGap + BiTE_Thickness))), y_0[1], 0.0389636f, y_0[1] - CE_Thickness, "Copper", n_Nodes_CE)); 
+            Layer_List.Add(TEM_Bottom);
+            Layer_List.Add(TEM_Top);
+            // End of ceramic geometry creation
 
-            // Create all BiTE elements
-            for (int k = 0; k < n_elements; k++)
+            // Generates Layers for air gaps to the far left and far right of the computational domain
+            Layer Left_Air_Gap = new Layer(Geometry_Errors, Coord_Left_Air_Gap[0], Coord_Left_Air_Gap[1], Coord_Left_Air_Gap[2], Coord_Left_Air_Gap[3], "Air", n_Nodes_Air);
+            Layer Right_Air_Gap = new Layer(Geometry_Errors, Coord_Right_Air_Gap[0], Coord_Right_Air_Gap[1], Coord_Right_Air_Gap[2], Coord_Right_Air_Gap[3], "Air", n_Nodes_Air);
+
+            Layer_List.Add(Left_Air_Gap);
+            Layer_List.Add(Right_Air_Gap);
+            // End creation of Air Gaps
+
+            // Generates Layer for first and last Cu pieces on the bottom (stubbed off ones)
+            Layer First_Bot_Cu = new Layer(Geometry_Errors, Coord_First_Bot_CU[0], Coord_First_Bot_CU[1], Coord_First_Bot_CU[2], Coord_First_Bot_CU[3], "Copper", n_Nodes_CE);
+            Layer Last_Bot_Cu = new Layer(Geometry_Errors, Coord_Last_Bot_CU[0], Coord_Last_Bot_CU[1], Coord_Last_Bot_CU[2], Coord_Last_Bot_CU[3], "Copper", n_Nodes_CE);
+
+            Layer_List.Add(First_Bot_Cu);
+            Layer_List.Add(Last_Bot_Cu);
+            // End creation of the first and last bottom Cu pieces
+
+            // Generates Layers for each the rest of the bottom Cu pieces
+            for (int i = 0; i < 8; i++)
             {
-                float x_0_BITE = x_0[1] + (k * (BiTE_Thickness + BiTE_AirGap));
-                float y_0_BiTE = y_0[2];
-                float x_f_BITE = x_0_BITE + BiTE_Thickness;
-                float y_f_BITE = y_0_BiTE - BiTE_Height;
+                float x0 = Coord_Cu_Bottom[0] + ((float)i * (BiTE_AirGap + CE_Width));
+                float y0 = Coord_Cu_Bottom[1];
+                float xf = x0 + CE_Width;
+                float yf = Coord_Cu_Bottom[3]; 
 
-                Layer_List.Add(new Layer(Geometry_Errors, x_0_BITE, y_0_BiTE, x_f_BITE, y_f_BITE, "BiTe", n_Nodes_BiTe));
+                Layer_List.Add(new Layer(Geometry_Errors, x0, y0, xf, yf, "Copper", n_Nodes_CE));
             }
+            // End creation of bottom Cu pieces
 
-            Geometry_Errors.UpdateProgress(20);
-
-            //Create Bottom Copper Elements (excluding first and last)
-            for (int j = 0; j < ((n_elements) / 2) - 1; j++)
+            // Generates Layers for each of the top of the Cu pieces
+            for (int i = 0; i < 9; i++)
             {
-                float x_0_CE = 0.003175f + (j * (BiTE_AirGap + CE_Width));
-                float y_0_CE = y_0[2];
+                float x0 = Coord_Cu_Top[0] + ((float)i * (BiTE_AirGap + CE_Width));
+                float y0 = Coord_Cu_Top[1];
+                float xf = x0 + CE_Width;
+                float yf = Coord_Cu_Top[3];
 
-                float x_f_CE = x_0_CE + CE_Width;
-                float y_f_CE = y_0_CE - CE_Thickness;
-
-                Layer_List.Add(new Layer(Geometry_Errors, x_0_CE, y_0_CE, x_f_CE, y_f_CE, "Copper", n_Nodes_CE));
+                Layer_List.Add(new Layer(Geometry_Errors, x0, y0, xf, yf, "Copper", n_Nodes_CE));
             }
+            // End creation of the top Cu pieces
 
-            Geometry_Errors.UpdateProgress(40);
-
-            // Create Top Copper Elements (all)
-            for (int j = 0; j < ((n_elements) / 2); j++)
+            // Generates layers for each of the Bismuth Telluride Pieces
+            for (int i = 0; i < 18; i++)
             {
-                float x_0_CE = x_0[2] + (j * (CE_Width + BiTE_AirGap));
-                float y_0_CE = y_0[3];
+                float x0 = Coord_BiTE[0] + ((float)i * (BiTE_Thickness + BiTE_AirGap));
+                float y0 = Coord_BiTE[1];
+                float xf = x0 + BiTE_Thickness;
+                float yf = Coord_BiTE[3];
 
-                float x_f_CE = x_0_CE + CE_Width;
-                float y_f_CE = y_0_CE - CE_Thickness;
-
-                Layer_List.Add(new Layer(Geometry_Errors, x_0_CE, y_0_CE, x_f_CE, y_f_CE, "Copper", n_Nodes_CE));
+                Layer_List.Add(new Layer(Geometry_Errors, x0, y0, xf, yf, "BiTe", n_Nodes_BiTe));
             }
-            Geometry_Errors.UpdateProgress(60);
+            // End creation of the Bismuth Telluride Pieces
 
-            // Create top Ceramic Plate
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], 0.00341499f, 0.0399796f, 0.00277999f, "Ceramic", n_Nodes_Ceramic));
-
-            // Create Air Boxes
-            //
-            // Area contained via left side by air
-            Layer_List.Add(new Layer(Geometry_Errors, x_0[0], y_0[3], x_0[1], y_f[1], "Air", n_Nodes_Air));
-
-            // Middle Boxes
-            for (int j = 0; j < ((n_elements) - 1); j++)
+            // Generates layers for air gaps that 'float' near top
+            for (int i = 0; i < 8; i++)
             {
-                float Air_x0 = x_0[1] + (BiTE_Thickness * j);
-                float Air_y0 = 0.0f;
+                float x0 = Coord_Top_AirGaps[0] + ((float)i * (2 * (BiTE_Thickness + BiTE_AirGap)));
+                float y0 = Coord_Top_AirGaps[1];
+                float xf = x0 + BiTE_AirGap;
+                float yf = Coord_Top_AirGaps[3];
 
-                if ((j % 2) == 0)
-                {
-                    Air_y0 = 0.0023749f;
-                }
-                else
-                {
-                    Air_y0 = y_0[3];
-                }
-
-                float Air_xf = Air_x0 + BiTE_AirGap;
-                float Air_yf = Air_y0 - AIR_Height;
-
-                Layer_List.Add(new Layer(Geometry_Errors, Air_x0, Air_y0, Air_xf, Air_yf, "Air", n_Nodes_Air));
+                Layer_List.Add(new Layer(Geometry_Errors, x0, y0, xf, yf, "Air", n_Nodes_Air));
             }
+            // End creation of layers for top air gaps
 
-            Geometry_Errors.UpdateProgress(100);
+            // Generates layers for air gaps that 'float' near bottom
+            for (int i = 0; i < 9; i++)
+            {
+                float x0 = Coord_Bottom_AirGaps[0] + ((float)i * (2 * (BiTE_Thickness + BiTE_AirGap)));
+                float y0 = Coord_Bottom_AirGaps[1];
+                float xf = x0 + BiTE_AirGap;
+                float yf = Coord_Bottom_AirGaps[3];
+
+                Layer_List.Add(new Layer(Geometry_Errors, x0, y0, xf, yf, "Air", n_Nodes_Air));
+            }
+            // End creation of layers for the bottom air gaps
 
             Geometry_Errors.Post_Error("NOTE:  Geometry for the TEM has been generated succesfully");
 
