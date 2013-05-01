@@ -15,12 +15,12 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// References the positive coordinate neighbor node (for node P on the western face of a layer this would correspond to the northern neighbor)
         /// </summary>
-        Node neighbor_1;
+        public int Neighbor_1_ID;
 
         /// <summary>
         /// References the negative coordinate neighbor node (for node P on the western face of a layer this would correspond to the southern neighbor)
         /// </summary>
-        Node neighbor_2;
+        public int Neighbor_2_ID;
 
 
         // Each instance of the Node Object has its own ErrorHandler with which to feed errors onto the main UI
@@ -45,6 +45,12 @@ namespace _2D_Patankar_Model
         /// Holds boolean value to describe if the current node is a boundary node or not
         /// </summary>
         public bool is_Boundary = false;
+
+        /// <summary>
+        /// Holds boolearn value to describe if the current node exists in a corner or not
+        /// </summary>
+        public bool is_Corner = false;
+
 
         /// <summary>
         /// Material string that indicates the material of this node for later conductivity retrieval

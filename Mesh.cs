@@ -29,10 +29,6 @@ namespace _2D_Patankar_Model
     // 
     class Mesh
     {
-        // max_X - Maximum physical x location [m]
-        //
-        // The maximum x-direction is governed by the width of the TE module
-
         // max_Y - Maximum physical y location [m]
         //
         // The maximum y-direction is governed by the entire height of the microDTA
@@ -40,12 +36,12 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Maximum x-direction [m]
         /// </summary>
-        const float max_X = 0.0401828f;
+        float max_X;
 
         /// <summary>
         /// Maximum y-direction [m]
         /// </summary>
-        const float max_Y = 0.004864f;
+        float max_Y;
 
         // Total number of nodes in physical system
         /// <summary>
@@ -84,7 +80,33 @@ namespace _2D_Patankar_Model
 
             Generate_Mesh_ByLayer(LayerList);
 
+            Find_X_max_Y_max();
+
             SetBoundaryNodes(LayerList);
+        }
+
+        private void Find_X_max_Y_max()
+        {
+            max_X = 0.0f;
+            max_Y = 0.0f;
+
+            foreach (Node[] nodes in NodeArray)
+            {
+                foreach (Node node in nodes)
+                {
+                    if (node.x_pos > max_X)
+                    {
+                        max_X = node.x_pos;
+                    }
+
+                    if (node.y_pos > max_Y)
+                    {
+                        max_Y = node.y_pos;
+                    }
+                }
+            }
+
+            Debug.WriteLine("Maximum X:  " + max_X.ToString() + "       Maximum Y:  " + max_Y.ToString());
         }
 
         // Main subroutine which generates the mesh, given XNODES and YNODES
@@ -130,6 +152,16 @@ namespace _2D_Patankar_Model
 
                         if (Check_Boundary(i, j, Layers.Nodes))
                             NodeList.Last().is_Boundary = true;
+
+                        if (X_POS == Layers.adjusted_X0 && Y_POS == Layers.adjusted_Y0)
+                        {
+                            NodeList.Last().is_Corner = true;
+                        }
+
+                        if (X_POS == Layers.adjusted_XF && Y_POS == Layers.adjusted_YF)
+                        {
+                            NodeList.Last().is_Corner = true;
+                        }                        
 
 
                         // Sets the Control Volume width for the current node equivalent to the equal spacing
@@ -283,16 +315,109 @@ namespace _2D_Patankar_Model
 
         private void SetBoundaryNodes(List<Layer> LayerList)
         {
+            int n_Set = 0;
+
             foreach (Node[] Array in NodeArray)
             {
                 foreach (Node node in Array)
                 {
-                    if (node.is_Boundary == true)
+                    if (node.is_Boundary == true && node.is_Corner == false) // Need way to check for comp boundary
                     {
                         // For the case when the node is on the left hand side
                         if (node.x_pos == LayerList[node.Layer_ID].adjusted_X0)
                         {
+                            // Look west until position variable != same node.Layer_ID by decrementing
+                            // phi_x_s and checking its layer position
+                            float phi_x_s = node.x_pos;
+                            int Layer_ID_Current = node.Layer_ID;
 
+                            while (Layer_ID_Current == node.Layer_ID)
+                            {
+                                // Check if negative
+                                phi_x_s = phi_x_s - (node.delta_x_E);
+
+                                if (phi_x_s < 0)
+                                    break;
+
+                                // Check which layer phi_x_s resides in
+                                foreach (Layer layer in LayerList)
+                                {
+                                    // If this evaluates to TRUE then the node resides in the current layer
+                                    if ((phi_x_s < layer.Layer_xf) && (phi_x_s > layer.Layer_x0) && (node.y_pos < layer.Layer_y0) && (node.y_pos > layer.Layer_yf))
+                                    {
+                                        // Pulls the layer ID out for use
+                                        Layer_ID_Current = layer.getID();
+                                    }
+                                }
+                            }
+
+                            // Now that the adjacent layer ID is found, iterate over each node at the neighboring layer's x_f line (in the y direction)
+                            // to find the two nodes that have the minimum dY to the current node
+                            float Xf_Of_Neighbor = LayerList[Layer_ID_Current].adjusted_XF;
+
+                            List<float> minDY = new List<float>();
+                            List<int> minDY_NodeIDs = new List<int>();
+
+                            float current_Min = 1000.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    // This pulls all of the nodes on the xf line of the neighbor
+                                    if (node_iter.Layer_ID == Layer_ID_Current && node_iter.x_pos == Xf_Of_Neighbor)
+                                    {
+                                        if (Math.Abs(node_iter.y_pos - node.y_pos) <= current_Min)
+                                        {
+                                            current_Min = Math.Abs(node_iter.y_pos - node.y_pos);
+
+                                            minDY.Add(current_Min);
+                                            minDY_NodeIDs.Add(node_iter.Node_ID);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // This is to ensure that you are not dealing with a boundary node
+                            if (minDY_NodeIDs.Count < 2)
+                                break;
+
+                            // Pull two smallest values from abs_Delta_Y list
+                            int minID_1 = minDY_NodeIDs[minDY_NodeIDs.Count - 1];
+                            int minID_2 = minDY_NodeIDs[minDY_NodeIDs.Count - 2];
+
+                            Debug.WriteLine("Node ID_1:  " + minID_1.ToString() + "        Node ID_2:  " + minID_2.ToString());
+
+                            // Since the nodes are always constructed from upper left to bottom right, the higher
+                            // the ID number, the lower the y-value, thus minID_1 has to be the closest neighbor
+                            // but this doesn't matter since I need the respective y-values of each
+                            float Y_Pos_ID_1 = 0.0f;
+                            float Y_Pos_ID_2 = 0.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    if (node_iter.Node_ID == minID_1)
+                                        Y_Pos_ID_1 = node_iter.y_pos;
+
+                                    if (node_iter.Node_ID == minID_2)
+                                        Y_Pos_ID_2 = node_iter.y_pos;
+                                }
+                            }
+
+                            if (Y_Pos_ID_1 > Y_Pos_ID_2)
+                            {
+                                node.Neighbor_1_ID = minID_1;
+                                node.Neighbor_2_ID = minID_2;
+                                n_Set++;
+                            }
+                            else
+                            {
+                                node.Neighbor_1_ID = minID_2;
+                                node.Neighbor_2_ID = minID_1;
+                                n_Set++;
+                            }
                         }
 
                         // For the case when the node is on the right hand side
@@ -306,15 +431,18 @@ namespace _2D_Patankar_Model
                         {
 
                         }
-
+ 
                         // For the case when the node is on the bottom of a given layer
                         if (node.y_pos == LayerList[node.Layer_ID].adjusted_YF)
                         {
 
                         }
                     }
+
                 }
             }
+
+            Debug.WriteLine("Number of Nodes hit:  " + n_Set.ToString());
         }
     }
 }

@@ -20,11 +20,6 @@ namespace _2D_Patankar_Model
         public List<Layer> Layer_List;
 
         /// <summary>
-        /// Holds values of number of coordinate pairs
-        /// </summary>
-        private int n_Coords;
-
-        /// <summary>
         /// Number of BiTE elements present on the TEM.  If this value is changed, the ceramic
         /// alumina plates will have to be updated as the sizes will no longer match up
         /// </summary>
