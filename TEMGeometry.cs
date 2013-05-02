@@ -18,16 +18,7 @@ namespace _2D_Patankar_Model
         /// List of layer objects that comprise the entire geometry of the TEM
         /// </summary>
         public List<Layer> Layer_List;
-
-        /// <summary>
-        /// Number of BiTE elements present on the TEM.  If this value is changed, the ceramic
-        /// alumina plates will have to be updated as the sizes will no longer match up
-        /// </summary>
-        private const int n_elements = 18;
-
-        // Series of constants defining in meters the thicknesses and widths of various
-        // repetitive layers for easy loop-generation of the geometry
-
+        
         /// <summary>
         /// Thickness of the BiTE elements [m] in x-direction
         /// </summary>
@@ -56,37 +47,31 @@ namespace _2D_Patankar_Model
         /// <summary>
         /// Number of nodes for the BiTe elements
         /// </summary>
-        private const int n_Nodes_BiTe = 30;
+        private const int n_Nodes_BiTe = 29;
 
         /// <summary>
         /// Number of nodes for the air elements
         /// </summary>
-        private const int n_Nodes_Air = 30;
+        private const int n_Nodes_Air = 29;
 
         /// <summary>
         /// Number of nodes for the copper connector elements
         /// </summary>
-        private const int n_Nodes_CE = 30;
+        private const int n_Nodes_CE = 29;
 
         /// <summary>
         /// Number of nodes for each ceramic alumina plate
         /// </summary>
-        private const int n_Nodes_Ceramic = 50;
+        private const int n_Nodes_Ceramic = 29;
 
 
         private float[] Coord_Ceramic_Base_Bottom = new float[4] { 0.0f, 0.635f, 39.9796f, 0.00f };
         private float[] Coord_Ceramic_Base_Top = new float[4] { 0.0f, 3.4150f, 39.9796f, 2.780f };
 
         private float[] Coord_Left_Air_Gap = new float[4] { 0.0f, 2.7800f, 1.016f, 0.635f };
-
-        // Right air gap X_0 needs to be increased I'm pretty sure
         private float[] Coord_Right_Air_Gap = new float[4] { 39.116f, 2.77999f, 39.97960f, 0.635f };
 
         private float[] Coord_First_Bot_CU = new float[4] { 1.016f, 1.0541f, 2.4130f, 0.635f };
-        
-        // Re Check this value
-        //private float[] Coord_Last_Bot_CU = new float[4] { 37.5666f, 1.0541f, 39.9796f, 0.635f };
-
         private float[] Coord_Last_Bot_CU = new float[4] { 37.719f, 1.0541f, 39.11600f, 0.635f };
 
         private float[] Coord_Cu_Bottom = new float[4] { 3.1750f, 1.0541f, 6.7310f, 0.635f };

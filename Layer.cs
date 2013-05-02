@@ -100,6 +100,26 @@ namespace _2D_Patankar_Model
         /// </summary>
         private static int LayerID = 0;
 
+        /// <summary>
+        /// Adjusted X0 used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_X0;
+
+        /// <summary>
+        /// Adjusted XF used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_XF;
+
+        /// <summary>
+        /// Adjusted Y0 used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_Y0;
+
+        /// <summary>
+        /// Adjusted YF used to align CV boundaries with material boundaries
+        /// </summary>
+        public float adjusted_YF;
+
         // The Layer_ID is the value of LayerID specific to this individual Layer.  Each
         // time the Layer constructor is called, LayerID is assigned to Layer_ID and then 
         // incremented
@@ -236,14 +256,17 @@ namespace _2D_Patankar_Model
         /// <returns>Node Positioning in the x-direction [m]</returns>
         public float X(float i)
         {
-            this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (4.0f * (float)Nodes);
+            this.layer_dx = (this.Layer_Rectangle.x_f - this.Layer_Rectangle.x_0) / (2.0f * (float)Nodes);
 
             float X0 = this.Layer_Rectangle.x_0 + this.layer_dx;
             float XF = this.Layer_Rectangle.x_f - this.layer_dx;
 
-            float dx = X0 + ((XF - X0) / ((float)Nodes - 1.0f)) * i;
+            this.adjusted_X0 = X0;
+            this.adjusted_XF = XF;
 
-            if (dx <= 0)
+            float dx = X0 + ((XF - X0) / ((float)Nodes)) * (float)i;
+
+            if (this.layer_dx <= 0 | dx <= 0)
                 Layer_Errors.Post_Error("Layer Error:  X position for a node set <= 0");
 
             return dx;
@@ -258,74 +281,23 @@ namespace _2D_Patankar_Model
         public float Y(float i)
         {
             // Eta_y in documentation
-            this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (4.0f*(float)Nodes);
+            this.layer_dy = (this.Layer_Rectangle.y_0 - this.Layer_Rectangle.y_f) / (2.0f * (float)Nodes);
 
             float Y0 = this.Layer_Rectangle.y_0 - this.layer_dy;
             float YF = this.Layer_Rectangle.y_f + this.layer_dy;
 
-            float dy = Y0 - ((Y0 - YF) / ((float)Nodes - 1.0f)) * i;
+            this.adjusted_Y0 = Y0;
+            this.adjusted_YF = YF;
 
-            if (dy <= 0)
+            float dy = Y0 - ((Y0 - YF) / ((float)Nodes)) * (float)i;
+
+            if (this.layer_dy <= 0 | dy <= 0)
                 Layer_Errors.Post_Error("Layer Error:  Y position for a node set <= 0");
 
             return dy;
         }
 
-        /// <summary>
-        /// Adjusted X0 used to align CV boundaries with material boundaries
-        /// </summary>
-        public float adjusted_X0 
-        { 
-            get
-            {
-                return (this.Layer_Rectangle.x_0 + this.layer_dx);
-            }
-            private set
-            {
-            }
-        }
         
-        /// <summary>
-        /// Adjusted XF used to align CV boundaries with material boundaries
-        /// </summary>
-        public float adjusted_XF
-        {
-            get
-            {
-                return (this.Layer_Rectangle.x_f - this.layer_dx);
-            }
-            private set
-            {
-            }
-        }
-
-        /// <summary>
-        /// Adjusted Y0 used to align CV boundaries with material boundaries
-        /// </summary>
-        public float adjusted_Y0
-        {
-            get
-            {
-                return (this.Layer_Rectangle.y_0 - this.layer_dy);
-            }
-            private set
-            {
-            }
-        }
-
-        /// <summary>
-        /// Adjusted YF used to align CV boundaries with material boundaries
-        /// </summary>
-        public float adjusted_YF
-        {
-            get
-            {
-                return (this.Layer_Rectangle.y_f + this.layer_dy);
-            }
-            private set
-            {
-            }
-        }
 
 
         private float NODESPACING;

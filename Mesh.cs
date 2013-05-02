@@ -135,9 +135,9 @@ namespace _2D_Patankar_Model
                 // Main double-for loop which iterates twice over Layers.Nodes (this assumes that each
                 // direction (x & y) has the same number of nodes, so that the total nodes for each layer
                 // is Layers.Nodes^2
-                for (int i = 0; i < Layers.Nodes; i++)
+                for (int i = 0; i <= Layers.Nodes; i++)
                 {
-                    for (int j = 0; j < Layers.Nodes; j++)
+                    for (int j = 0; j <= Layers.Nodes; j++)
                     {
                         layer_Nodes++;
 
@@ -202,6 +202,18 @@ namespace _2D_Patankar_Model
             // Calls the Sort_Nodes function which arranges the nodes into a jagged array Nodes[][]
             // and organizes them with respect to their physical distance from origin.
             Sort_Nodes(NodeList);
+        }
+
+        private Node[,] Generate_Mesh_ByLayer(List<Layer> LayerList, int N_Lines_1, int N_Lines_2)
+        {
+            Node[,] Node_Array = null;
+
+            List<float> x_Lines = new List<float>();
+            List<float> y_Lines = new List<float>();
+
+
+            return Node_Array;
+
         }
 
         /// <summary>
@@ -313,28 +325,49 @@ namespace _2D_Patankar_Model
 
         }
 
+        /// <summary>
+        /// Need to add in correction for node positioning, but this function finds neighbor nodes for each
+        /// material
+        /// </summary>
+        /// <param name="LayerList">List of layers present in the numeric model</param>
         private void SetBoundaryNodes(List<Layer> LayerList)
         {
-            int n_Set = 0;
+            int n_Boundary_Nodes_UnFixed = 0;
+            int n_Set_Left = 0;
+            int n_Set_Right = 0;
+            int n_Set_Top = 0;
+            int n_Set_Bottom = 0;
+
+            int n_Tested_Top = 0;
+            int n_Tested_Bottom = 0;
+            int n_Tested_Left = 0;
+            int n_Tested_Right = 0;
 
             foreach (Node[] Array in NodeArray)
             {
                 foreach (Node node in Array)
                 {
-                    if (node.is_Boundary == true && node.is_Corner == false) // Need way to check for comp boundary
+
+                    if (node.is_Boundary == true && node.is_Corner == false) 
                     {
+                        n_Boundary_Nodes_UnFixed++;
+
+                        // *****************************************************
                         // For the case when the node is on the left hand side
+                        // *****************************************************
                         if (node.x_pos == LayerList[node.Layer_ID].adjusted_X0)
                         {
+                            n_Tested_Left++;
                             // Look west until position variable != same node.Layer_ID by decrementing
                             // phi_x_s and checking its layer position
                             float phi_x_s = node.x_pos;
+
                             int Layer_ID_Current = node.Layer_ID;
 
                             while (Layer_ID_Current == node.Layer_ID)
                             {
                                 // Check if negative
-                                phi_x_s = phi_x_s - (node.delta_x_E);
+                                phi_x_s = phi_x_s - (node.delta_x_E / (10.0f));
 
                                 if (phi_x_s < 0)
                                     break;
@@ -380,13 +413,14 @@ namespace _2D_Patankar_Model
 
                             // This is to ensure that you are not dealing with a boundary node
                             if (minDY_NodeIDs.Count < 2)
+                            {
+                                Debug.WriteLine("Broken on LHS");
                                 break;
+                            }
 
                             // Pull two smallest values from abs_Delta_Y list
                             int minID_1 = minDY_NodeIDs[minDY_NodeIDs.Count - 1];
                             int minID_2 = minDY_NodeIDs[minDY_NodeIDs.Count - 2];
-
-                            Debug.WriteLine("Node ID_1:  " + minID_1.ToString() + "        Node ID_2:  " + minID_2.ToString());
 
                             // Since the nodes are always constructed from upper left to bottom right, the higher
                             // the ID number, the lower the y-value, thus minID_1 has to be the closest neighbor
@@ -410,39 +444,342 @@ namespace _2D_Patankar_Model
                             {
                                 node.Neighbor_1_ID = minID_1;
                                 node.Neighbor_2_ID = minID_2;
-                                n_Set++;
+                                n_Set_Left++;
                             }
                             else
                             {
                                 node.Neighbor_1_ID = minID_2;
                                 node.Neighbor_2_ID = minID_1;
-                                n_Set++;
+                                n_Set_Left++;
                             }
-                        }
+                            n_Boundary_Nodes_UnFixed--;
+                        } // END CASE where node boundary is on the left hand side
 
+                        // *****************************************************
                         // For the case when the node is on the right hand side
+                        // *****************************************************
                         if (node.x_pos == LayerList[node.Layer_ID].adjusted_XF)
                         {
+                            n_Tested_Right++;
+                            // Look east until position variable != same node.Layer_ID by incrementing
+                            // phi_x_s and checking its layer position
+                            float phi_x_s = node.x_pos;
+                            int Layer_ID_Current = node.Layer_ID;
 
-                        }
+                            while (Layer_ID_Current == node.Layer_ID)
+                            {
+                                // Check if > max_X
+                                phi_x_s = phi_x_s + (node.delta_x_E/(10.0f));
 
+                                if (phi_x_s > max_X)
+                                {
+                                    break;
+                                }
+                                // Check which layer phi_x_s resides in
+                                foreach (Layer layer in LayerList) // Copied from other x-direction function
+                                {
+                                    // If this evaluates to TRUE then the node resides in the current layer
+                                    if ((phi_x_s < layer.Layer_xf) && (phi_x_s > layer.Layer_x0) && (node.y_pos < layer.Layer_y0) && (node.y_pos > layer.Layer_yf))
+                                    {
+                                        // Pulls the layer ID out for use
+                                        Layer_ID_Current = layer.getID();
+                                    }
+                                }
+                            }
+
+
+                            // Now that the adjacent layer ID is found, iterate over each node at the neighboring layer's x_0 line (in the y direction)
+                            // to find the two nodes that have the minimum dY to the current node
+                            float X0_Of_Neighbor = LayerList[Layer_ID_Current].adjusted_X0;
+
+                            List<float> minDY = new List<float>();
+                            List<int> minDY_NodeIDs = new List<int>();
+
+                            float current_Min = 1000.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    // This pulls all of the nodes on the x0 line of the neighbor
+                                    if (node_iter.Layer_ID == Layer_ID_Current && node_iter.x_pos == X0_Of_Neighbor)
+                                    {
+                                        if (Math.Abs(node_iter.y_pos - node.y_pos) <= current_Min)
+                                        {
+                                            current_Min = Math.Abs(node_iter.y_pos - node.y_pos);
+
+                                            minDY.Add(current_Min);
+                                            minDY_NodeIDs.Add(node_iter.Node_ID);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // This is to ensure that you are not dealing with a boundary node
+                            if (minDY_NodeIDs.Count < 2)
+                            {
+                                Debug.WriteLine("Broken on RHS");
+                                break;
+                            }
+
+                            // Pull two smallest values from abs_Delta_Y list
+                            int minID_1 = minDY_NodeIDs[minDY_NodeIDs.Count - 1];
+                            int minID_2 = minDY_NodeIDs[minDY_NodeIDs.Count - 2];
+
+                            // Since the nodes are always constructed from upper left to bottom right, the higher
+                            // the ID number, the lower the y-value, thus minID_1 has to be the closest neighbor
+                            // but this doesn't matter since I need the respective y-values of each
+                            float Y_Pos_ID_1 = 0.0f;
+                            float Y_Pos_ID_2 = 0.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    if (node_iter.Node_ID == minID_1)
+                                        Y_Pos_ID_1 = node_iter.y_pos;
+
+                                    if (node_iter.Node_ID == minID_2)
+                                        Y_Pos_ID_2 = node_iter.y_pos;
+                                }
+                            }
+
+                            if (Y_Pos_ID_1 > Y_Pos_ID_2)
+                            {
+                                node.Neighbor_1_ID = minID_1;
+                                node.Neighbor_2_ID = minID_2;
+                                n_Set_Right++;
+                            }
+                            else
+                            {
+                                node.Neighbor_1_ID = minID_2;
+                                node.Neighbor_2_ID = minID_1;
+                                n_Set_Right++;
+                            }
+
+                            n_Boundary_Nodes_UnFixed--;
+
+                        } // END CASE where the node is on the right hand side of a given layer
+
+                        // *****************************************************
                         // For the case when the node is on top of a given layer
+                        // *****************************************************
                         if (node.y_pos == LayerList[node.Layer_ID].adjusted_Y0)
                         {
+                            n_Tested_Top++;
+                            // Look north until position variable != same node.Layer_ID by incrementing
+                            // phi_y_s and checking its layer position
+                            float phi_y_s = node.y_pos;
+                            int Layer_ID_Current = node.Layer_ID; //
 
-                        }
- 
+                            while (Layer_ID_Current == node.Layer_ID)
+                            {
+                                // Check if > max_Y
+                                phi_y_s = phi_y_s + (node.delta_y_N / (10.0f));
+
+                                if (phi_y_s > max_Y)
+                                {
+                                    break;
+                                }
+                                // Check which layer phi_x_s resides in
+                                foreach (Layer layer in LayerList) // Copied from other x-direction function
+                                {
+                                    // If this evaluates to TRUE then the node resides in the current layer
+                                    if ((node.x_pos < layer.Layer_xf) && (node.x_pos > layer.Layer_x0) && (phi_y_s < layer.Layer_y0) && (phi_y_s > layer.Layer_yf))
+                                    {
+                                        // Pulls the layer ID out for use
+                                        Layer_ID_Current = layer.getID();
+                                    }
+                                }
+                            }
+
+
+                            // Now that the adjacent layer ID is found, iterate over each node at the neighboring layer's YF line (in the x direction)
+                            // to find the two nodes that have the minimum dX to the current node
+                            float YF_Of_Neighbor = LayerList[Layer_ID_Current].adjusted_YF;
+
+                            List<float> minDX = new List<float>();
+                            List<int> minDX_NodeIDs = new List<int>();
+
+                            float current_Min = 1000.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    // This pulls all of the nodes on the YF line of the neighbor
+                                    if (node_iter.Layer_ID == Layer_ID_Current && node_iter.y_pos == YF_Of_Neighbor)
+                                    {
+                                        if (Math.Abs(node_iter.x_pos - node.x_pos) <= current_Min)
+                                        {
+                                            current_Min = Math.Abs(node_iter.x_pos - node.x_pos);
+
+                                            minDX.Add(current_Min);
+                                            minDX_NodeIDs.Add(node_iter.Node_ID);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // This is to ensure that you are not dealing with a boundary node
+                            if (minDX_NodeIDs.Count < 2)
+                            {
+                                Debug.WriteLine("Broken on Top");
+                                break;
+                            }
+
+                            // Pull two smallest values from abs_Delta_Y list
+                            int minID_1 = minDX_NodeIDs[minDX_NodeIDs.Count - 1];
+                            int minID_2 = minDX_NodeIDs[minDX_NodeIDs.Count - 2];
+
+                            // Since the nodes are always constructed from upper left to bottom right, the higher
+                            // the ID number, the lower the y-value, thus minID_1 has to be the closest neighbor
+                            // but this doesn't matter since I need the respective y-values of each
+                            float Y_Pos_ID_1 = 0.0f;
+                            float Y_Pos_ID_2 = 0.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    if (node_iter.Node_ID == minID_1)
+                                        Y_Pos_ID_1 = node_iter.x_pos;
+
+                                    if (node_iter.Node_ID == minID_2)
+                                        Y_Pos_ID_2 = node_iter.x_pos;
+                                }
+                            }
+
+                            if (Y_Pos_ID_1 > Y_Pos_ID_2)
+                            {
+                                node.Neighbor_1_ID = minID_1;
+                                node.Neighbor_2_ID = minID_2;
+                                n_Set_Top++;
+                            }
+                            else
+                            {
+                                node.Neighbor_1_ID = minID_2;
+                                node.Neighbor_2_ID = minID_1;
+                                n_Set_Top++;
+                            }
+
+                            n_Boundary_Nodes_UnFixed--;
+                        } // END CASE where the node is on the top of a given layer
+
+                        // *****************************************************
                         // For the case when the node is on the bottom of a given layer
+                        // *****************************************************
                         if (node.y_pos == LayerList[node.Layer_ID].adjusted_YF)
                         {
+                            n_Tested_Bottom++;
 
-                        }
-                    }
+                            // Look north until position variable != same node.Layer_ID by incrementing
+                            // phi_y_s and checking its layer position
+                            float phi_y_s = node.y_pos;
+                            int Layer_ID_Current = node.Layer_ID; //
+
+                            while (Layer_ID_Current == node.Layer_ID)
+                            {
+                                // Check if > 0
+                                phi_y_s = phi_y_s - (node.delta_y_N / (10.0f));
+
+                                if (phi_y_s < 0)
+                                {
+                                    break;
+                                }
+                                // Check which layer phi_x_s resides in
+                                foreach (Layer layer in LayerList) // Copied from other x-direction function
+                                {
+                                    // If this evaluates to TRUE then the node resides in the current layer
+                                    if ((node.x_pos < layer.Layer_xf) && (node.x_pos > layer.Layer_x0) && (phi_y_s < layer.Layer_y0) && (phi_y_s > layer.Layer_yf))
+                                    {
+                                        // Pulls the layer ID out for use
+                                        Layer_ID_Current = layer.getID();
+                                    }
+                                }
+                            }
+
+
+                            // Now that the adjacent layer ID is found, iterate over each node at the neighboring layer's Y0 line (in the x direction)
+                            // to find the two nodes that have the minimum dX to the current node
+                            float Y0_Of_Neighbor = LayerList[Layer_ID_Current].adjusted_Y0;
+
+                            List<float> minDX = new List<float>();
+                            List<int> minDX_NodeIDs = new List<int>();
+
+                            float current_Min = 1000.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    // This pulls all of the nodes on the Y0 line of the neighbor
+                                    if (node_iter.Layer_ID == Layer_ID_Current && node_iter.y_pos == Y0_Of_Neighbor)
+                                    {
+                                        if (Math.Abs(node_iter.x_pos - node.x_pos) <= current_Min)
+                                        {
+                                            current_Min = Math.Abs(node_iter.x_pos - node.x_pos);
+
+                                            minDX.Add(current_Min);
+                                            minDX_NodeIDs.Add(node_iter.Node_ID);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // This is to ensure that you are not dealing with a boundary node
+                            if (minDX_NodeIDs.Count < 2)
+                            {
+                                break;
+                            }
+
+                            // Pull two smallest values from abs_Delta_Y list
+                            int minID_1 = minDX_NodeIDs[minDX_NodeIDs.Count - 1];
+                            int minID_2 = minDX_NodeIDs[minDX_NodeIDs.Count - 2];
+
+                            // Since the nodes are always constructed from upper left to bottom right, the higher
+                            // the ID number, the lower the y-value, thus minID_1 has to be the closest neighbor
+                            // but this doesn't matter since I need the respective y-values of each
+                            float Y_Pos_ID_1 = 0.0f;
+                            float Y_Pos_ID_2 = 0.0f;
+
+                            foreach (Node[] nodes in NodeArray)
+                            {
+                                foreach (Node node_iter in nodes)
+                                {
+                                    if (node_iter.Node_ID == minID_1)
+                                        Y_Pos_ID_1 = node_iter.x_pos;
+
+                                    if (node_iter.Node_ID == minID_2)
+                                        Y_Pos_ID_2 = node_iter.x_pos;
+                                }
+                            }
+
+                            if (Y_Pos_ID_1 > Y_Pos_ID_2)
+                            {
+                                node.Neighbor_1_ID = minID_1;
+                                node.Neighbor_2_ID = minID_2;
+                                n_Set_Bottom++;
+                            }
+                            else
+                            {
+                                node.Neighbor_1_ID = minID_2;
+                                node.Neighbor_2_ID = minID_1;
+                                n_Set_Bottom++;
+                            }
+
+                            n_Boundary_Nodes_UnFixed--;
+                            
+                        } // END CASE where node is on bottom
+
+                    } // END IF is_Boundary
 
                 }
             }
 
-            Debug.WriteLine("Number of Nodes hit:  " + n_Set.ToString());
+            Mesh_Errors.Post_Error("Number of Nodes hit (Left, Right, Top, Bottom):  " + "( " + n_Set_Left + ", " + n_Set_Right + ", " + n_Set_Top + ", " + n_Set_Bottom + " )");
+            Mesh_Errors.Post_Error("Number of Nodes tested (Left, Right, Top, Bottom):  " + "( " + n_Tested_Left + ", " + n_Tested_Right + ", " + n_Tested_Top + ", " + n_Tested_Bottom + " )");
+            Mesh_Errors.Post_Error("Numer of nodes potentially unfixed (Need to account for corners + comp. boundaries):  " + (n_Boundary_Nodes_UnFixed).ToString());
         }
     }
 }
